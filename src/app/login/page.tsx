@@ -4,9 +4,28 @@ import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
 
+import { jwtDecode } from "jwt-decode";
+
 export default function Login() {
 	const { register, handleSubmit } = useForm();
 	const router = useRouter();
+
+	// const onSubmit = async (data: any) => {
+	// 	try {
+	// 		const response = await axiosClassic.post("/auth/login", data);
+	// 		const token = response.data.accessToken;
+
+	// 		if (!token) throw new Error("Нет accessToken в ответе сервера");
+
+	// 		localStorage.setItem("accessToken", token);
+
+	// 		alert("Login successful");
+	// 		router.push("/");
+	// 	} catch (error: any) {
+	// 		console.error(error.response?.data?.message || "Login failed");
+	// 		alert(error.response?.data?.message || "Ошибка входа");
+	// 	}
+	// };
 
 	const onSubmit = async (data: any) => {
 		try {
@@ -17,8 +36,14 @@ export default function Login() {
 
 			localStorage.setItem("accessToken", token);
 
-			alert("Login successful");
+			// Декодируем токен
+			const decoded: any = jwtDecode(token);
+			localStorage.setItem("userId", decoded.userId); // Сохраняем userId
 
+			console.log(decoded, "decoded");
+			console.log(localStorage.getItem("userId"), "userid");
+
+			alert("Login successful");
 			router.push("/");
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
