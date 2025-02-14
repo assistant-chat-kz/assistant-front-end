@@ -25,7 +25,7 @@ export default function Login() {
 			console.log(localStorage.getItem("userId"), "userid");
 
 			alert("Login successful");
-			router.push("/");
+			router.push("/chat");
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
 			alert(error.response?.data?.message || "Ошибка входа");

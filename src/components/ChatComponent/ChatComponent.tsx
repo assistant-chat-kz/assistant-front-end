@@ -1,10 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageBox } from "react-chat-elements";
+import { useUser } from "@/app/hooks/useUser";
+
 import "react-chat-elements/dist/main.css";
 
+interface IMessage {
+    position: left | right;
+    type: "text",
+    title: string;
+    text: string
+}
+
 export default function ChatComponent() {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<IMessage[]>([]);
     const [input, setInput] = useState("");
+
+    const userId = localStorage.getItem("userId") ?? undefined
+
+    const { data: user, isLoading, error } = useUser(userId)
+
+    useEffect(() => {
+        setMessages([
+            {
+                position: "left",
+                type: "text",
+                title: "Ассистент",
+                text: "Привет! Я ваш психолог-ассистент. Чем могу помочь?",
+            },
+        ])
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -14,7 +38,7 @@ export default function ChatComponent() {
         const userMessage = {
             position: "right",
             type: "text",
-            title: "User",
+            title: user?.name,
             text: input,
         };
 
