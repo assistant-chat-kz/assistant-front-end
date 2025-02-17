@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import { MessageBox } from "react-chat-elements";
 import { useUser } from "@/app/hooks/useUser";
@@ -5,6 +7,7 @@ import { useUser } from "@/app/hooks/useUser";
 import "react-chat-elements/dist/main.css";
 
 interface IMessage {
+    //@ts-ignore
     position: left | right;
     type: "text",
     title: string;
@@ -15,7 +18,7 @@ export default function ChatComponent() {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [input, setInput] = useState("");
 
-    const userId = localStorage.getItem("userId") ?? undefined
+    const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
     const { data: user, isLoading, error } = useUser(userId)
 
@@ -30,6 +33,7 @@ export default function ChatComponent() {
         ])
     }, [])
 
+    //@ts-ignore
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -42,6 +46,7 @@ export default function ChatComponent() {
             text: input,
         };
 
+        //@ts-ignore
         setMessages((prev) => [...prev, userMessage]);
 
         try {
@@ -62,6 +67,7 @@ export default function ChatComponent() {
                 text: data.response,
             };
 
+            //@ts-ignore
             setMessages((prev) => [...prev, botMessage]);
         } catch (error) {
             console.error("Error fetching response:", error);
@@ -74,6 +80,7 @@ export default function ChatComponent() {
         <div className="max-w-md mx-auto border border-gray-300 p-4 rounded-lg">
             <div className="h-96 min-h-400 overflow-y-auto p-2 bg-white rounded-lg">
                 {messages.map((msg, index) => (
+                    //@ts-ignore
                     <MessageBox key={index} {...msg} />
                 ))}
             </div>

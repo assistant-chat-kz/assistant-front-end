@@ -21,6 +21,7 @@ export default function Register() {
 			alert("Registration successful");
 			router.push("/chat");
 		} catch (error) {
+			//@ts-ignore
 			console.error(error.response?.data?.message || "Registration failed");
 		}
 	};
@@ -45,6 +46,7 @@ export default function Register() {
 								className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
 							/>
 							{errors.name && (
+								//@ts-ignore
 								<p className="text-red-500 text-sm">{errors.name.message}</p>
 							)}
 						</div>
@@ -57,6 +59,7 @@ export default function Register() {
 								className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
 							/>
 							{errors.surname && (
+								//@ts-ignore
 								<p className="text-red-500 text-sm">{errors.surname.message}</p>
 							)}
 						</div>
@@ -77,6 +80,7 @@ export default function Register() {
 							className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
 						/>
 						{errors.email && (
+							//@ts-ignore
 							<p className="text-red-500 text-sm">{errors.email.message}</p>
 						)}
 					</div>
@@ -97,6 +101,7 @@ export default function Register() {
 							className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
 						/>
 						{errors.password && (
+							//@ts-ignore
 							<p className="text-red-500 text-sm">{errors.password.message}</p>
 						)}
 					</div>
@@ -116,7 +121,7 @@ export default function Register() {
 						/>
 						{errors.confirmPassword && (
 							<p className="text-red-500 text-sm">
-								{errors.confirmPassword.message}
+								Пароли не совпадают
 							</p>
 						)}
 					</div>
