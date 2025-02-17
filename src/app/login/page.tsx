@@ -10,6 +10,8 @@ export default function Login() {
 	const { register, handleSubmit } = useForm();
 	const router = useRouter();
 
+	console.log('flex')
+
 	const onSubmit = async (data: any) => {
 		try {
 			const response = await axiosClassic.post("/auth/login", data);
