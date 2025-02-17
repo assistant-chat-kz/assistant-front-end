@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { prompt } = req.body;
 
-    const response = await fetch('http://localhost:4200/api/yandex-gpt/generate', {
+    const response = await fetch('/api/yandex-gpt/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'applocation/json' },
         body: JSON.stringify({ prompt }),

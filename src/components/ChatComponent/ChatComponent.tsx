@@ -50,7 +50,7 @@ export default function ChatComponent() {
         setMessages((prev) => [...prev, userMessage]);
 
         try {
-            const res = await fetch("http://147.182.189.56:4200/api/yandex-gpt/generate", {
+            const res = await fetch("/api/yandex-gpt/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
