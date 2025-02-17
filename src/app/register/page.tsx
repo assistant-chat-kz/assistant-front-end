@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
 	const {
@@ -11,11 +12,14 @@ export default function Register() {
 		formState: { errors },
 	} = useForm();
 
+	const router = useRouter();
+
 	const onSubmit = async (data: any) => {
 		try {
 			const response = await axiosClassic.post("/auth/register", data);
 			console.log(data);
 			alert("Registration successful");
+			router.push("/chat");
 		} catch (error) {
 			console.error(error.response?.data?.message || "Registration failed");
 		}
