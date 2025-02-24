@@ -7,11 +7,12 @@ import { useRouter } from "next/navigation";
 
 import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
+import { useChatHistory } from "@/app/hooks/useChatHistory";
 
 interface IMessage {
     //@ts-ignore
     position: left | right;
-    type: "text",
+    // type: "text",
     title: string;
     text: string
 }
@@ -26,6 +27,7 @@ export default function ChatComponent() {
 
     const { data: user, isLoading, error } = useUser(userId)
 
+    const { data: chat } = useChatHistory(userId)
 
     useEffect(() => {
         if (!user && !isLoading) {
@@ -37,12 +39,14 @@ export default function ChatComponent() {
         setMessages([
             {
                 position: "left",
-                type: "text",
+                // type: "text",
                 title: "Ассистент",
                 text: "Привет! Я ваш психолог-ассистент. Чем могу помочь?",
             },
         ])
     }, [])
+
+
 
     //@ts-ignore
     const handleSubmit = async (e) => {
@@ -54,7 +58,7 @@ export default function ChatComponent() {
 
         const userMessage = {
             position: "right",
-            type: "text",
+            // type: "text",
             title: user?.name,
             text: input,
         };
@@ -63,27 +67,37 @@ export default function ChatComponent() {
         setMessages((prev) => [...prev, userMessage]);
 
         try {
+
+            const lastFiveMessage = chat.messages
+                .map((message: any, index: number) =>
+                    `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
+                )
+                .join('\n')
+
+
             const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
-                prompt: `Ты профессиональный психолог-ассистент. Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, давать полезные советы и помогать пользователю разобраться в своих чувствах. \n\nПользователь: ${input}\nПсихолог:`,
-            }) /* {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: `Ты профессиональный психолог-ассистент. Общайся так, чтобы поддерживать, давать полезные советы и помогать пользователю разобраться в своих чувствах. Отправляй короткие ответы. \n\nПользователь: ${input}\nПсихолог:`,
-                }),
-            } */);
+                prompt: `Ты профессиональный психолог-ассистент. 
+            Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, 
+            давать полезные советы и помогать пользователю разобраться в своих чувствах. 
+            
+            ${lastFiveMessage}
+            Пользователь: ${input}
+            Психолог:`,
+            }));
 
             const data = await res.data;
 
             const botMessage = {
                 position: "left",
-                type: "text",
+                // type: "text",
                 title: "Ассистент",
                 text: data.response,
             };
 
             //@ts-ignore
             setMessages((prev) => [...prev, botMessage]);
+
+            await axiosClassic.put(`/chat-history/${userId}`, { userId: userId, messages: [userMessage, botMessage] })
 
             setInput("")
         } catch (error) {
@@ -98,7 +112,7 @@ export default function ChatComponent() {
             <div className="flex-1 overflow-auto p-2 bg-white rounded-lg">
                 {messages.map((msg, index) => (
                     //@ts-ignore
-                    <MessageBox key={index} {...msg} />
+                    <MessageBox key={index} type="text" {...msg} />
                 ))}
             </div>
 

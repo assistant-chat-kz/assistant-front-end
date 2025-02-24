@@ -17,7 +17,6 @@ export default function Register() {
 	const onSubmit = async (data: any) => {
 		try {
 			const response = await axiosClassic.post("/auth/register", data);
-			console.log(data);
 			alert("Registration successful");
 			router.push("/chat");
 		} catch (error) {

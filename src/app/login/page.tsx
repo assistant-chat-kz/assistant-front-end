@@ -10,8 +10,6 @@ export default function Login() {
 	const { register, handleSubmit } = useForm();
 	const router = useRouter();
 
-	console.log('flex')
-
 	const onSubmit = async (data: any) => {
 		try {
 			const response = await axiosClassic.post("/auth/login", data);
@@ -22,9 +20,6 @@ export default function Login() {
 			localStorage.setItem("accessToken", token);
 			const decoded: any = jwtDecode(token);
 			localStorage.setItem("userId", decoded.userId);
-
-			console.log(decoded, "decoded");
-			console.log(localStorage.getItem("userId"), "userid");
 
 			alert("Login successful");
 			router.push("/chat");
