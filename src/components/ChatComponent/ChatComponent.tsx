@@ -112,7 +112,7 @@ export default function ChatComponent() {
     };
 
     return (
-        <div className="max-w-md min-h-screen flex flex-col mx-auto border border-gray-300 p-4 rounded-lg">
+        <div className="h-screen flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
             <div className="flex-1 overflow-auto p-2 bg-white rounded-lg">
                 {messages.map((msg, index) => (
                     //@ts-ignore
