@@ -3,7 +3,8 @@ import axios, { type CreateAxiosDefaults } from 'axios'
 
 const options: CreateAxiosDefaults = {
 	// baseURL: 'http://localhost:4200/api',
-	baseURL: '/api',
+	// baseURL: '/api',
+	baseURL: 'http://147.182.189.56:4200/api',
 	headers: {
 		'Content-Type': 'application/json'
 	},
