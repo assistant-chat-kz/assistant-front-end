@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
 import { useChatHistory } from "@/app/hooks/useChatHistory";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
 interface IMessage {
     //@ts-ignore
@@ -22,6 +24,7 @@ export default function ChatComponent() {
     const [input, setInput] = useState("");
 
     const router = useRouter()
+    const queryClient = useQueryClient();
 
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
@@ -46,8 +49,6 @@ export default function ChatComponent() {
         ])
     }, [])
 
-
-
     //@ts-ignore
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -68,11 +69,11 @@ export default function ChatComponent() {
 
         try {
 
-            const lastFiveMessage = chat.messages
+            const lastFiveMessage = chat ? chat.messages
                 .map((message: any, index: number) =>
                     `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
                 )
-                .join('\n')
+                .join('\n') : ""
 
 
             const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
@@ -98,6 +99,9 @@ export default function ChatComponent() {
             setMessages((prev) => [...prev, botMessage]);
 
             await axiosClassic.put(`/chat-history/${userId}`, { userId: userId, messages: [userMessage, botMessage] })
+
+            //@ts-ignore
+            queryClient.invalidateQueries(["chatHistory", userId])
 
             setInput("")
         } catch (error) {
