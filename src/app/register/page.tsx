@@ -4,7 +4,11 @@ import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
 
-export default function Register() {
+interface RegisterProps {
+	userType: string;
+}
+
+export default function Register({ userType }: RegisterProps) {
 	const {
 		register,
 		handleSubmit,
@@ -14,9 +18,17 @@ export default function Register() {
 
 	const router = useRouter();
 
+	console.log(userType, 'userType')
+
 	const onSubmit = async (data: any) => {
+
+		const dataForRegister = {
+			...data,
+			userType: userType ? userType : undefined
+		}
+
 		try {
-			const response = await axiosClassic.post("/auth/register", data);
+			const response = await axiosClassic.post("/auth/register", dataForRegister);
 			alert("Registration successful");
 			router.push("/chat");
 		} catch (error) {

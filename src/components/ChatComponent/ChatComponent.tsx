@@ -9,12 +9,10 @@ import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
 import { useChatHistory } from "@/app/hooks/useChatHistory";
 import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 
 interface IMessage {
     //@ts-ignore
     position: left | right;
-    // type: "text",
     title: string;
     text: string
 }
