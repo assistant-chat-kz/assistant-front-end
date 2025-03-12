@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Register from "../register/page";
+import Cabinet from "@/components/Cabinet/Cabinet";
+import Login from "../login/page";
 
 export default function AdminPanel() {
     const [login, setLogin] = useState("");
@@ -19,7 +21,7 @@ export default function AdminPanel() {
     };
 
     if (isAuthenticated) {
-        return <Register userType="admin" />;
+        return <Login userType={"admin"} />;
     }
 
     return (

@@ -18,8 +18,6 @@ export default function Register({ userType }: RegisterProps) {
 
 	const router = useRouter();
 
-	console.log(userType, 'userType')
-
 	const onSubmit = async (data: any) => {
 
 		const dataForRegister = {

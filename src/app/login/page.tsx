@@ -6,13 +6,19 @@ import { useRouter } from "next/navigation";
 
 import { jwtDecode } from "jwt-decode";
 
-export default function Login() {
+interface ILogin {
+	userType: string
+}
+
+export default function Login({ userType }: ILogin) {
 	const { register, handleSubmit } = useForm();
 	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
 		try {
-			const response = await axiosClassic.post("/auth/login", data);
+			const response = await (userType === 'admin'
+				? axiosClassic.post("/auth/loginAdmin", data)
+				: axiosClassic.post("/auth/login", data));
 			const token = response.data.accessToken;
 
 			if (!token) throw new Error("Нет accessToken в ответе сервера");
@@ -22,7 +28,7 @@ export default function Login() {
 			localStorage.setItem("userId", decoded.userId);
 
 			alert("Login successful");
-			router.push("/chat");
+			userType === 'admin' ? router.push('/cabinet') : router.push('/chat');
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
 			alert(error.response?.data?.message || "Ошибка входа");
