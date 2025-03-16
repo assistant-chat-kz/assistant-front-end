@@ -28,7 +28,8 @@ export default function Register({ userType }: RegisterProps) {
 		try {
 			const response = await axiosClassic.post("/auth/register", dataForRegister);
 			alert("Registration successful");
-			router.push("/chat");
+
+			userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
 		} catch (error) {
 			//@ts-ignore
 			console.error(error.response?.data?.message || "Registration failed");
@@ -39,7 +40,7 @@ export default function Register({ userType }: RegisterProps) {
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
 				<h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-					Регистрация
+					{userType === 'admin' ? 'Регистрация админа' : userType === 'psychologist' ? 'Регистрация психолога' : 'Регистрация'}
 				</h2>
 			</div>
 

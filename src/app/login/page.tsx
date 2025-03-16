@@ -16,11 +16,19 @@ export default function Login({ userType }: ILogin) {
 
 	const onSubmit = async (data: any) => {
 		try {
-			const response = await (userType === 'admin'
-				? axiosClassic.post("/auth/loginAdmin", data)
-				: axiosClassic.post("/auth/login", data));
-			const token = response.data.accessToken;
+			let response;
 
+			try {
+				response = await (userType === "admin"
+					? axiosClassic.post("/auth/loginAdmin", data)
+					: axiosClassic.post("/auth/login", data));
+			} catch (error: any) {
+				console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
+
+				response = await axiosClassic.post("/auth/loginPsychologist", data);
+			}
+
+			const token = response.data.accessToken;
 			if (!token) throw new Error("Нет accessToken в ответе сервера");
 
 			localStorage.setItem("accessToken", token);
@@ -28,12 +36,20 @@ export default function Login({ userType }: ILogin) {
 			localStorage.setItem("userId", decoded.userId);
 
 			alert("Login successful");
-			userType === 'admin' ? router.push('/cabinet') : router.push('/chat');
+
+			if (userType === "admin") {
+				router.push("/cabinet");
+			} else {
+				router.push("/chat");
+			}
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
 			alert(error.response?.data?.message || "Ошибка входа");
 		}
 	};
+
+	console.log(localStorage.getItem("userId"))
+
 
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
