@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
+import { nanoid } from "nanoid";
 
 import { jwtDecode } from "jwt-decode";
 
@@ -39,17 +40,16 @@ export default function Login({ userType }: ILogin) {
 
 			if (userType === "admin") {
 				router.push("/cabinet");
+			} else if (userType === "psychologist") {
+				router.push("/dashboard");
 			} else {
-				router.push("/chat");
+				router.push(`/chat/${nanoid(10)}`);
 			}
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
 			alert(error.response?.data?.message || "Ошибка входа");
 		}
 	};
-
-	console.log(localStorage.getItem("userId"))
-
 
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">

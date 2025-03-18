@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 
 import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
-import { useChatHistory } from "@/app/hooks/useChatHistory";
+import { useChat } from "@/app/hooks/useChat";
 import { useQueryClient } from "@tanstack/react-query";
+import { chatService } from "@/app/services/chat.service";
 
 interface IMessage {
     //@ts-ignore
@@ -28,15 +29,30 @@ export default function ChatComponent() {
 
     const { data: user, isLoading, error } = useUser(userId)
 
-    const { data: chat } = useChatHistory(userId)
+    // const { data: chat } = useChat(userId)
 
     useEffect(() => {
-        if (!user && !isLoading) {
+        if (!userId && !isLoading) {
             router.push("/login");
         }
     }, [user, isLoading, router]);
 
+    // const handleCreateChat = async () => {
+    //     try {
+    //         const newChat = await chatService.createChat(
+    //             [{ title: 'Привет', text: 'Как дела?', position: 'left' }],
+    //             ['user1', 'user2']
+    //         );
+    //         console.log('Чат создан:', newChat);
+    //     } catch (error) {
+    //         console.error('Ошибка создания чата:', error);
+    //     }
+    // };
+
+    // console.log(handleCreateChat())
+
     useEffect(() => {
+
         setMessages([
             {
                 position: "left",
@@ -96,10 +112,10 @@ export default function ChatComponent() {
             //@ts-ignore
             setMessages((prev) => [...prev, botMessage]);
 
-            await axiosClassic.put(`/chat-history/${userId}`, { userId: userId, messages: [userMessage, botMessage] })
+            await axiosClassic.put(`/chat/${userId}`, { userId: userId, messages: [userMessage, botMessage] })
 
             //@ts-ignore
-            queryClient.invalidateQueries(["chatHistory", userId])
+            queryClient.invalidateQueries(["chat", userId])
 
             setInput("")
         } catch (error) {
