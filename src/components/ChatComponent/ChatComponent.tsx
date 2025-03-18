@@ -9,7 +9,6 @@ import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
 import { useChat } from "@/app/hooks/useChat";
 import { useQueryClient } from "@tanstack/react-query";
-import { chatService } from "@/app/services/chat.service";
 
 interface IMessage {
     //@ts-ignore
@@ -18,7 +17,7 @@ interface IMessage {
     text: string
 }
 
-export default function ChatComponent() {
+export default function ChatComponent({ chatId, messagesInChat }: { chatId?: string; messagesInChat?: any[] }) {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [input, setInput] = useState("");
 
@@ -28,8 +27,9 @@ export default function ChatComponent() {
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
     const { data: user, isLoading, error } = useUser(userId)
+    const { data: chat } = useChat(chatId)
 
-    // const { data: chat } = useChat(userId)
+    console.log(messages, 'messages')
 
     useEffect(() => {
         if (!userId && !isLoading) {
@@ -37,31 +37,13 @@ export default function ChatComponent() {
         }
     }, [user, isLoading, router]);
 
-    // const handleCreateChat = async () => {
-    //     try {
-    //         const newChat = await chatService.createChat(
-    //             [{ title: 'Привет', text: 'Как дела?', position: 'left' }],
-    //             ['user1', 'user2']
-    //         );
-    //         console.log('Чат создан:', newChat);
-    //     } catch (error) {
-    //         console.error('Ошибка создания чата:', error);
-    //     }
-    // };
-
-    // console.log(handleCreateChat())
-
     useEffect(() => {
 
-        setMessages([
-            {
-                position: "left",
-                // type: "text",
-                title: "Ассистент",
-                text: "Привет! Я ваш психолог-ассистент. Чем могу помочь?",
-            },
-        ])
-    }, [])
+        if (messagesInChat) {
+            setMessages(messagesInChat)
+        }
+
+    }, [messagesInChat])
 
     //@ts-ignore
     const handleSubmit = async (e) => {
@@ -112,10 +94,10 @@ export default function ChatComponent() {
             //@ts-ignore
             setMessages((prev) => [...prev, botMessage]);
 
-            await axiosClassic.put(`/chat/${userId}`, { userId: userId, messages: [userMessage, botMessage] })
+            await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage, botMessage] })
 
             //@ts-ignore
-            queryClient.invalidateQueries(["chat", userId])
+            queryClient.invalidateQueries(["chat", chatId])
 
             setInput("")
         } catch (error) {

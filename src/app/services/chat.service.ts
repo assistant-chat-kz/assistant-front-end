@@ -14,6 +14,11 @@ class ChatService {
         const response = await axiosClassic.get(`${this.BASE_URL}/${chatId}`)
         return response
     }
+
+    async getAllChats() {
+        const response = await axiosClassic.get(`${this.BASE_URL}`)
+        return response
+    }
 }
 
 export const chatService = new ChatService()

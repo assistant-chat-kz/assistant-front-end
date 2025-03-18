@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
-import { nanoid } from "nanoid";
 
 import { jwtDecode } from "jwt-decode";
 
@@ -43,7 +42,7 @@ export default function Login({ userType }: ILogin) {
 			} else if (userType === "psychologist") {
 				router.push("/dashboard");
 			} else {
-				router.push(`/chat/${nanoid(10)}`);
+				router.push(`/chat`);
 			}
 		} catch (error: any) {
 			console.error(error.response?.data?.message || "Login failed");
