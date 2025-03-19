@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { jwtDecode } from "jwt-decode";
 
@@ -13,6 +14,8 @@ interface ILogin {
 export default function Login({ userType }: ILogin) {
 	const { register, handleSubmit } = useForm();
 	const router = useRouter();
+
+	const pathname = usePathname()
 
 	const onSubmit = async (data: any) => {
 		try {
@@ -28,6 +31,8 @@ export default function Login({ userType }: ILogin) {
 				response = await axiosClassic.post("/auth/loginPsychologist", data);
 			}
 
+			console.log(data)
+
 			const token = response.data.accessToken;
 			if (!token) throw new Error("Нет accessToken в ответе сервера");
 
@@ -38,7 +43,7 @@ export default function Login({ userType }: ILogin) {
 			alert("Login successful");
 
 			if (userType === "admin") {
-				router.push("/cabinet");
+				router.push('cabinet')
 			} else if (userType === "psychologist") {
 				router.push("/dashboard");
 			} else {
@@ -111,7 +116,7 @@ export default function Login({ userType }: ILogin) {
 				<p className="mt-10 text-center text-sm text-gray-500">
 					Нет аккаунта?{" "}
 					<a
-						href="register"
+						href={pathname === '/admin-panel' ? '/admin-panel/register' : 'register'}
 						className="font-semibold text-indigo-600 hover:text-indigo-500"
 					>
 						Регистрация

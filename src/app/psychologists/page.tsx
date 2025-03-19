@@ -1,6 +1,7 @@
 'use client';
 
 import NotFound from "@/components/NotFound/NotFound";
+import { useRouter } from "next/navigation";
 import { getUserId } from "../hooks/getUserId";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
@@ -9,8 +10,14 @@ export default function Psychologists() {
 
     const { data: admin, isLoading } = useAdmin(getUserId())
 
+    const router = useRouter()
+
     if (!admin && !isLoading) {
         return NotFound()
+    }
+
+    const toPsychologist = () => {
+        router.push('psychologists/create')
     }
 
     return (
@@ -18,7 +25,7 @@ export default function Psychologists() {
 
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <button
-                    // onClick={toPsychologist}
+                    onClick={toPsychologist}
                     className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
                 >
                     Создать психолога

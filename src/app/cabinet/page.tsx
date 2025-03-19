@@ -1,21 +1,25 @@
 "use client";
 
-import { useUser } from "../hooks/useUser";
+import { useAdmin } from "../hooks/useAdmin";
+import { usePsy } from "../hooks/usePsy";
 import { useRouter } from "next/navigation";
 
 export default function Cabinet() {
 
-
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
-    const { data: user, isLoading, error } = useUser(userId)
+    const { data: psy } = usePsy(userId)
 
-    console.log(user)
+    console.log(psy)
 
     const router = useRouter();
 
     const toPsychologist = () => {
         router.push('/psychologists')
+    }
+
+    const toChats = () => {
+        router.push('/chatsList')
     }
 
     return (
@@ -27,6 +31,12 @@ export default function Cabinet() {
                     className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
                 >
                     Психологи
+                </button>
+                <button
+                    onClick={toChats}
+                    className="mt-10 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
+                >
+                    Чаты
                 </button>
             </div>
 
