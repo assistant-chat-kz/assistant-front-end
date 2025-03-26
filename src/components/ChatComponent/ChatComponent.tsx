@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { MessageBox } from "react-chat-elements";
 import { useUser } from "@/app/hooks/useUser";
+import { usePsy } from "@/app/hooks/usePsy";
 import { useRouter } from "next/navigation";
 
 import "react-chat-elements/dist/main.css";
@@ -26,10 +27,15 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
+
     const { data: user, isLoading, error } = useUser(userId)
+    const { data: psy, } = usePsy(userId)
     const { data: chat } = useChat(chatId)
 
-    console.log(messages, 'messages')
+    console.log(psy, 'psy')
+    console.log(chat, 'chat')
+
+
 
     useEffect(() => {
         if (!userId && !isLoading) {
@@ -41,9 +47,30 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
         if (messagesInChat) {
             setMessages(messagesInChat)
+
+            if (psy) {
+                setMessages(messages => messages.map(msg => ({
+                    ...msg,
+                    position: msg.position === 'left' ? 'right' : 'left'
+                })));
+            }
         }
 
-    }, [messagesInChat])
+    }, [messagesInChat, psy])
+
+    // useEffect(() => {
+    //     if (psy) {
+    //         setMessages(messages => messages.map(msg => ({
+    //             ...msg,
+    //             position: msg.position === 'left' ? 'right' : 'left'
+    //         })));
+    //     }
+    // }, [psy]);
+
+    console.log(messages, 'messages')
+
+
+
 
     //@ts-ignore
     const handleSubmit = async (e) => {
@@ -54,9 +81,9 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         setInput("");
 
         const userMessage = {
-            position: "right",
+            position: psy ? "left" : "right",
             // type: "text",
-            title: user?.name,
+            title: psy ? psy.name : user?.name,
             text: input,
         };
 
@@ -65,36 +92,47 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
         try {
 
-            const lastFiveMessage = chat ? chat.messages
-                .map((message: any, index: number) =>
-                    `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
-                )
-                .join('\n') : ""
+            let data;
+
+            if (!psy) {
+                const lastFiveMessage = chat ? chat.messages
+                    .map((message: any, index: number) =>
+                        `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
+                    )
+                    .join('\n') : ""
 
 
-            const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
-                prompt: `Ты профессиональный психолог-ассистент. 
+                const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
+                    prompt: `Ты профессиональный психолог-ассистент. 
             Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, 
             давать полезные советы и помогать пользователю разобраться в своих чувствах. 
             
             ${lastFiveMessage}
             Пользователь: ${input}
             Психолог:`,
-            }));
+                }));
 
-            const data = await res.data;
+                data = await res.data;
 
-            const botMessage = {
-                position: "left",
-                // type: "text",
-                title: "Ассистент",
-                text: data.response,
-            };
 
-            //@ts-ignore
-            setMessages((prev) => [...prev, botMessage]);
+                const botMessage = {
+                    position: "left",
+                    // type: "text",
+                    title: "Ассистент",
+                    text: data.response,
+                };
 
-            await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage, botMessage] })
+                //@ts-ignore
+                setMessages((prev) => [...prev, botMessage]);
+
+                await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage, botMessage] })
+            } else {
+                setMessages((prev) => [...prev]);
+
+                await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage] })
+            }
+
+
 
             //@ts-ignore
             queryClient.invalidateQueries(["chat", chatId])

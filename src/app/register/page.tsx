@@ -29,7 +29,8 @@ export default function Register({ userType }: RegisterProps) {
 			const response = await axiosClassic.post("/auth/register", dataForRegister);
 			alert("Registration successful");
 
-			userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
+			// userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
+			router.push('/login')
 		} catch (error) {
 			//@ts-ignore
 			console.error(error.response?.data?.message || "Registration failed");

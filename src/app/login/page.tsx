@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { useUser } from "../hooks/useUser";
 
 import { jwtDecode } from "jwt-decode";
 
@@ -20,6 +21,7 @@ export default function Login({ userType }: ILogin) {
 	const onSubmit = async (data: any) => {
 		try {
 			let response;
+			let userTypeData;
 
 			try {
 				response = await (userType === "admin"
@@ -29,6 +31,7 @@ export default function Login({ userType }: ILogin) {
 				console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
 
 				response = await axiosClassic.post("/auth/loginPsychologist", data);
+				userTypeData = 'psychologist'
 			}
 
 			console.log(data)
@@ -44,8 +47,8 @@ export default function Login({ userType }: ILogin) {
 
 			if (userType === "admin") {
 				router.push('cabinet')
-			} else if (userType === "psychologist") {
-				router.push("/dashboard");
+			} else if (userTypeData === "psychologist") {
+				router.push("/cabinet");
 			} else {
 				router.push(`/chat`);
 			}
