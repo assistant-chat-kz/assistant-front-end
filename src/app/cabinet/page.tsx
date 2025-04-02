@@ -10,8 +10,6 @@ export default function Cabinet() {
 
     const { data: psy } = usePsy(userId)
 
-    console.log(psy)
-
     const router = useRouter();
 
     const toPsychologist = () => {

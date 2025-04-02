@@ -34,8 +34,6 @@ export default function Login({ userType }: ILogin) {
 				userTypeData = 'psychologist'
 			}
 
-			console.log(data)
-
 			const token = response.data.accessToken;
 			if (!token) throw new Error("Нет accessToken в ответе сервера");
 

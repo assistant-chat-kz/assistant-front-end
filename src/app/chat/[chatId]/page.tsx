@@ -7,7 +7,10 @@ import { getUserId } from "@/app/hooks/getUserId";
 
 
 export default function ChatPage() {
-    const { chatId } = useParams()
+
+    const params = useParams() as { chatId: string };
+
+    const { chatId } = params
     const router = useRouter()
 
     const userId = getUserId()
@@ -15,8 +18,6 @@ export default function ChatPage() {
     if (!userId) {
         router.push('/login')
     }
-
-    console.log(userId)
 
     const { data: chat } = useChat(chatId)
 
