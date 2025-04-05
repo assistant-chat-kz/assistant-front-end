@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Register from "../register/page";
-import Login from "../login/page";
+import Login from "@/components/Login/Login";
 
 export default function AdminPanel() {
     const [login, setLogin] = useState("");

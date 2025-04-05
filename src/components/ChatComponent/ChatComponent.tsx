@@ -232,6 +232,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    console.log(chat)
+
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
             <Modal title={"Подтвердите"} content={"Вы уверены что хотите выйти из чата?"} openModal={openModal} setOpenModal={setOpenModal} action={handleLeaveChat} />
@@ -240,7 +242,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     //@ts-ignore
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
-                <div ref={messagesEndRef} /> {/* Невидимый элемент для прокрутки */}
+                <div ref={messagesEndRef} />
             </div>
 
             <form onSubmit={handleSubmit} className="flex mt-4">
@@ -253,7 +255,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 <button type="submit" className="ml-2 p-2 bg-blue-500 text-white rounded-lg">Отправить</button>
                 {psy ?
                     <button type="button" onClick={handleOpenModal} className="ml-2 p-2 bg-red-500 text-white rounded-lg">Выйти из чата</button>
-                    : <button type="button" onClick={() => callPsychologist(chatId, true)} className="ml-2 p-2 bg-green-500 text-white rounded-lg">Позвать психолога</button>}
+                    :
+                    chat?.call ? <button type="button" className="ml-2 p-2 bg-red-500 text-white rounded-lg">Вы вызвали психолога</button> : <button type="button" onClick={() => callPsychologist(chatId, true)} className="ml-2 p-2 bg-green-500 text-white rounded-lg">Позвать психолога</button>}
             </form>
         </div>
 

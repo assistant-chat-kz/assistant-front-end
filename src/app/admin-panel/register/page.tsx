@@ -1,6 +1,6 @@
 "use client";
 
-import Register from "@/app/register/page";
+import Register from "@/components/Register/Register";
 
 export default function AdminPanelRegister() {
     return (
