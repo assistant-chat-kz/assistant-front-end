@@ -12,7 +12,9 @@ import { useChat } from "@/app/hooks/useChat";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSocket } from '../../app/hooks/useSocket'
 import { useCallPsy } from "@/app/hooks/useCallPsy";
+import { useConsultation } from "@/app/hooks/useConsultation";
 import Modal from '@/components/Modal/Modal'
+import SurveyComponent from "../Survey/SurveyComponent";
 
 
 interface IMessage {
@@ -29,6 +31,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [openModal, setOpenModal] = useState(false)
     const [showCallPsyButton, setShowCallPsyButton] = useState(false);
 
+    const [showSurvey, setShowSurvey] = useState(false)
+
     const router = useRouter()
     const queryClient = useQueryClient();
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -38,12 +42,11 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const { data: user, isLoading, error } = useUser(userId)
     const { data: psy, } = usePsy(userId)
     const { data: chat } = useChat(chatId)
+    const { data: consultation } = useConsultation(chatId, userId)
     const { callPsychologist } = useCallPsy()
 
     //@ts-ignore
     const socket = useSocket(userId)
-
-
 
     useEffect(() => {
         updateMessagesInChat();
@@ -93,13 +96,21 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
             });
         });
 
+        socket.on("send-survey", ({ chatId }) => {
+            console.log("📋 Пришёл опрос:", chatId);
+            setShowSurvey(true)
+        });
+
 
         return () => {
             socket.off("newMessage");
             socket.off("userJoined");
             socket.off("userLeave");
+            socket.off("send-survey");
         };
     }, [socket, chatId]);
+
+    console.log(consultation, 'consultation')
 
 
     useEffect(() => {
@@ -243,7 +254,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    console.log(showCallPsyButton)
+    console.log(messages)
 
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
@@ -254,6 +265,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
                 <div ref={messagesEndRef} />
+                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} /> : undefined}
             </div>
 
             <form onSubmit={handleSubmit} className="flex mt-4">
