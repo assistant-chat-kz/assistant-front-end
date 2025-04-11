@@ -42,6 +42,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const { data: user, isLoading, error } = useUser(userId)
     const { data: psy, } = usePsy(userId)
     const { data: chat } = useChat(chatId)
+
     const { data: consultation } = useConsultation(chatId, userId)
     const { callPsychologist } = useCallPsy()
 
