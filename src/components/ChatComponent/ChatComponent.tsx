@@ -99,8 +99,9 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
         socket.on("send-survey", ({ chatId }) => {
             console.log("📋 Пришёл опрос:", chatId);
-            setShowSurvey(true)
+            setShowSurvey(true);
         });
+
 
 
         return () => {
@@ -120,15 +121,17 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         }
     }, [user, isLoading, router]);
 
-    useEffect(() => {
-        if (!psy && chatId && !chat?.call) {
-            const timer = setTimeout(() => {
-                setShowCallPsyButton(true);
-            }, 3 * 60 * 1000)
+    // useEffect(() => {
+    //     if (!psy && chatId && !chat?.call) {
+    //         const timer = setTimeout(() => {
+    //             setShowCallPsyButton(true);
+    //         }, 3 * 60 * 1000)
 
-            return () => clearInterval(timer)
-        }
-    }, [psy, chatId, chat])
+    //         return () => clearInterval(timer)
+    //     }
+    // }, [psy, chatId, chat])
+
+
 
     const handleLeaveChat = () => {
         socket?.emit("leaveChat", chatId);
@@ -266,7 +269,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
                 <div ref={messagesEndRef} />
-                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} /> : undefined}
+                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} setShowSurvey={setShowSurvey} /> : undefined}
             </div>
 
             <form onSubmit={handleSubmit} className="flex mt-4">
@@ -280,7 +283,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 {psy ?
                     <button type="button" onClick={handleOpenModal} className="ml-2 p-2 bg-red-500 text-white rounded-lg">Выйти из чата</button>
                     :
-                    showCallPsyButton ? chat?.call ? <button type="button" className="ml-2 p-2 bg-red-500 text-white rounded-lg">Вы вызвали психолога</button>
+                    !showCallPsyButton ? chat?.call ? <button type="button" className="ml-2 p-2 bg-red-500 text-white rounded-lg">Вы вызвали психолога</button>
                         : <button type="button" onClick={() => callPsychologist(chatId, true)} className="ml-2 p-2 bg-green-500 text-white rounded-lg">Позвать психолога</button> : undefined}
             </form>
         </div>

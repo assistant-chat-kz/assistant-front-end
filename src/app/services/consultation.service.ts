@@ -17,6 +17,11 @@ class ConsultationService {
 
         return response.data
     }
+
+    async getAllConsultation() {
+        const response = await axiosClassic.get(`${this.BASE_URL}`)
+        return response
+    }
 }
 
 export const consultationService = new ConsultationService()

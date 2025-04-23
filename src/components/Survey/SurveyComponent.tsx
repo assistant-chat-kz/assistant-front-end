@@ -6,10 +6,13 @@ import { useState } from "react"
 interface ISurveyComponent {
     chatId: string | undefined;
     user: IUserResponce | undefined;
+    setShowSurvey: any
     // questions: IQuestionResponce[]
 }
 
-export default function SurveyComponent({ chatId, user }: ISurveyComponent) {
+export default function SurveyComponent({ chatId, user, setShowSurvey }: ISurveyComponent) {
+
+    const [endCons, setEndCons] = useState(false)
 
     console.log(chatId, user, 'chat aqnd user')
 
@@ -62,6 +65,9 @@ export default function SurveyComponent({ chatId, user }: ISurveyComponent) {
                     answers
                 });
 
+                setEndCons(true)
+
+
             } catch (error: any) {
                 console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
             }
@@ -70,31 +76,31 @@ export default function SurveyComponent({ chatId, user }: ISurveyComponent) {
 
     return (
         <div>
-            <h2>Опрос</h2>
+            {!endCons ? <><h2>Опрос</h2>
 
-            {questionsArray.map((questionText, qIndex) => (
-                <div key={qIndex}>
-                    <p>{questionText}</p>
-                    <ul style={{ display: 'flex', gap: '8px' }}>
-                        {Array.from({ length: 10 }, (_, index) => (
-                            <li key={index}>
-                                <input
-                                    type="radio"
-                                    name={questionText}
-                                    checked={answers[questionText] === index + 1}
-                                    onChange={() => handleAnswerChange(questionText, index + 1)}
-                                />
-                                {index + 1}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            ))}
+                {questionsArray.map((questionText, qIndex) => (
+                    <div key={qIndex}>
+                        <p>{questionText}</p>
+                        <ul style={{ display: 'flex', gap: '8px' }}>
+                            {Array.from({ length: 10 }, (_, index) => (
+                                <li key={index}>
+                                    <input
+                                        type="radio"
+                                        name={questionText}
+                                        checked={answers[questionText] === index + 1}
+                                        onChange={() => handleAnswerChange(questionText, index + 1)}
+                                    />
+                                    {index + 1}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
 
 
-            {/* <pre>{JSON.stringify(answers, null, 2)}</pre> */}
-            <button onClick={() => sendSurvey()} className="ml-2 p-2 bg-blue-500 text-white rounded-lg">Отправить и закончить консультацию</button>
-
+                {/* <pre>{JSON.stringify(answers, null, 2)}</pre> */}
+                <button onClick={() => sendSurvey()} className="ml-2 p-2 bg-blue-500 text-white rounded-lg">Отправить и закончить консультацию</button>
+            </> : <h2>Консультация окончена</h2>}
         </div>
     );
 }

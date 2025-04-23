@@ -9,6 +9,7 @@ export interface IQuestionResponce {
 
 export interface IConsultationResponce {
     chatId: string;
-    user: IUserResponce,
+    createdAt: string;
+    userId: string,
     questions: IQuestionResponce[]
 }
