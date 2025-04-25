@@ -6,31 +6,14 @@ import { useState } from "react"
 interface ISurveyComponent {
     chatId: string | undefined;
     user: IUserResponce | undefined;
-    setShowSurvey: any
-    // questions: IQuestionResponce[]
+    psyId: string | undefined
 }
 
-export default function SurveyComponent({ chatId, user, setShowSurvey }: ISurveyComponent) {
+export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponent) {
 
     const [endCons, setEndCons] = useState(false)
 
     console.log(chatId, user, 'chat aqnd user')
-
-    // const [answers, setAnswers] = useState({
-    //     question1: null,
-    //     question2: null,
-    //     question3: null,
-    //     question4: null,
-    //     question5: null
-    // })
-
-    // const questionsArray = [
-    //     '1.Насколько вы довольны этой консультацией?',
-    //     '2.Как вы себя чувствуете после сессии по сравнению с тем, как чувствовали себя до неё?',
-    //     '3.Хотели бы вы продолжить работу с чат-ботом в будущем?',
-    //     '4.Насколько чат-бот был полезен в решении вашей проблемы?',
-    //     '5.Чувствуете ли вы эмоциональную поддержку после этой консультации?'
-    // ]
 
     const questionsArray = [
         '1.Насколько вы довольны этой консультацией?',
@@ -62,7 +45,8 @@ export default function SurveyComponent({ chatId, user, setShowSurvey }: ISurvey
                 const response = await axiosClassic.post("/consultation", {
                     chatId,
                     user,
-                    answers
+                    answers,
+                    psyId
                 });
 
                 setEndCons(true)

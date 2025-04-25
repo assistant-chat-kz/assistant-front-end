@@ -24,6 +24,11 @@ class ChatService {
         const response = await axiosClassic.put(`${this.BASE_URL}/${chatId}/call`, { call })
         return response
     }
+
+    async insertPsyInChat(chatId: string, psyId: string) {
+        const response = await axiosClassic.put(`${this.BASE_URL}/${chatId}/psyInChat`, { psyId })
+        return response
+    }
 }
 
 export const chatService = new ChatService()

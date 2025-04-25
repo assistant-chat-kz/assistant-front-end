@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSocket } from '../../app/hooks/useSocket'
 import { useCallPsy } from "@/app/hooks/useCallPsy";
 import { useConsultation } from "@/app/hooks/useConsultation";
+import { usePsyInChat } from "@/app/hooks/usePsyInChat";
 import Modal from '@/components/Modal/Modal'
 import SurveyComponent from "../Survey/SurveyComponent";
 
@@ -45,6 +46,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
     const { data: consultation } = useConsultation(chatId, userId)
     const { callPsychologist } = useCallPsy()
+    const { psyInChat } = usePsyInChat()
 
     //@ts-ignore
     const socket = useSocket(userId)
@@ -55,6 +57,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
             callPsychologist(chatId, false)
         }
     }, [messagesInChat, psy, chatId, socket]);
+
+    console.log(chat, 'chattytt')
 
     useEffect(() => {
         if (!socket || !chatId) return;
@@ -80,6 +84,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
         socket.on("userJoined", ({ members: newMembers }) => {
             console.log(`👤 Обновленный список участников:`, newMembers);
+            if (psy) psyInChat(chatId, psy.id)
             //@ts-ignore
             setMembers((prev) => {
                 const isDifferent = JSON.stringify(prev) !== JSON.stringify(newMembers);
@@ -269,7 +274,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
                 <div ref={messagesEndRef} />
-                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} setShowSurvey={setShowSurvey} /> : undefined}
+                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} psyId={chat?.psy} /> : undefined}
             </div>
 
             <form onSubmit={handleSubmit} className="flex mt-4">

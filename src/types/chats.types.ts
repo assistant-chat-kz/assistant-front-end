@@ -3,4 +3,5 @@ export interface IChatResponce {
     members: string[];
     messages: any[]
     call: boolean
+    psy?: string
 }

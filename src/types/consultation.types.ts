@@ -11,5 +11,6 @@ export interface IConsultationResponce {
     chatId: string;
     createdAt: string;
     userId: string,
+    psyId: string,
     questions: IQuestionResponce[]
 }

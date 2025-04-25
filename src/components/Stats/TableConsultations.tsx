@@ -1,3 +1,4 @@
+import { usePsy } from "@/app/hooks/usePsy"
 import { IConsultationResponce } from "@/types/consultation.types"
 
 interface ITableConsultations {
@@ -20,25 +21,35 @@ export default function TableConsultations({ consultations }: ITableConsultation
                         <th scope="col" className="px-6 py-3">
                             Результаты консультации
                         </th>
+                        <th scope="col" className="px-6 py-3">
+                            Психолог
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
-                    {consultations?.map(cons => (
-                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                                {cons.chatId}
-                            </th>
-                            <td className="px-6 py-4">
-                                {new Date(cons.createdAt).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4">
-                                {cons.questions.map(que =>
-                                    <div>{que.question}:
-                                        <span className="text-red-500">{que.answer}</span></div>)}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
+                {consultations?.map(cons => {
+                    const { data: psy } = usePsy(cons.psyId)
+                    console.log(psy, 'psy')
+                    return (
+                        <tbody>
+                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
+                                    {cons.chatId}
+                                </th>
+                                <td className="px-6 py-4">
+                                    {new Date(cons.createdAt).toLocaleString()}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {cons.questions.map(que =>
+                                        <div>{que.question}:
+                                            <span className="text-red-500">{que.answer}</span></div>)}
+                                </td>
+                                {psy ? <td className="px-6 py-4">
+                                    {`${psy?.name} ${psy?.surname}`}
+                                </td> : undefined}
+                            </tr>
+                        </tbody>
+                    )
+                })}
             </table>
         </div>
     )
