@@ -15,6 +15,7 @@ export default function StatsId() {
     const consultationFilter = consultations?.filter(cons => params.stats === cons.userId)
 
     return (
+        //@ts-ignore
         <TableConsultations consultations={consultationFilter} />
     )
 }
