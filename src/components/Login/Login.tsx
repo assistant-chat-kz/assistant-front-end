@@ -28,6 +28,7 @@ export default function Login({ userType }: ILogin) {
                 console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
 
                 response = await axiosClassic.post("/auth/loginPsychologist", data);
+
                 userTypeData = 'psychologist'
             }
 

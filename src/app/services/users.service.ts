@@ -12,6 +12,11 @@ class UserService {
         const response = await axiosClassic.get(`${this.BASE_URL}/${userId}`)
         return response
     }
+
+    async verifyUser(userId: string) {
+        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}`)
+        return response
+    }
 }
 
 export const userService = new UserService()

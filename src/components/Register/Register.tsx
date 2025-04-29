@@ -25,7 +25,8 @@ export default function Register({ userType }: RegisterProps) {
 
         try {
             const response = await axiosClassic.post("/auth/register", dataForRegister);
-            alert("Registration successful");
+            // alert("Registration successful");
+            alert("Подождите когда вашу почту подтвердят ");
 
             // userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
             router.push('/login')
