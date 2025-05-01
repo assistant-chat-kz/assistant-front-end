@@ -43,9 +43,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const { data: user, isLoading, error } = useUser(userId)
     const { data: psy, } = usePsy(userId)
     const { data: chat } = useChat(chatId)
-    if (!user || !psy) {
-        router.push('/login')
-    }
 
     const { data: consultation } = useConsultation(chatId, userId)
     const { callPsychologist } = useCallPsy()
@@ -120,12 +117,16 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         };
     }, [socket, chatId]);
 
-    console.log(consultation, 'consultation')
+    console.log(user, 'user')
+
+
 
 
     useEffect(() => {
-        if (!userId && !isLoading) {
-            router.push("/login");
+        if (!isLoading) {
+            if (!psy && !user) {
+                router.push("/login");
+            }
         }
     }, [user, isLoading, router]);
 
