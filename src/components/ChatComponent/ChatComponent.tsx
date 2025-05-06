@@ -30,6 +30,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [input, setInput] = useState("");
     const [members, setMembers] = useState<any>([])
     const [openModal, setOpenModal] = useState(false)
+    const [openModalLogout, setOpenModalLogout] = useState(false)
     const [showCallPsyButton, setShowCallPsyButton] = useState(false);
 
     const [showSurvey, setShowSurvey] = useState(false)
@@ -146,6 +147,12 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         socket?.emit("leaveChat", chatId);
         router.push('/chatsList')
     };
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('userId')
+        router.push('/login')
+    }
 
     const sendMessage = () => {
         if (!input.trim()) return;
@@ -272,6 +279,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
             <Modal title={"Подтвердите"} content={"Вы уверены что хотите выйти из чата?"} openModal={openModal} setOpenModal={setOpenModal} action={handleLeaveChat} />
+            <Modal title={"Подтвердите"} content={"Вы уверены что хотите выйти из аккаунта?"} openModal={openModalLogout} setOpenModal={setOpenModalLogout} action={handleLogout} />
             <div className="flex-1 overflow-auto p-2 bg-white rounded-lg">
                 {messages.map((msg, index) => (
                     //@ts-ignore
@@ -289,6 +297,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     className="flex-1 p-2 border border-gray-300 rounded-lg"
                 />
                 <button type="submit" className="ml-2 p-2 bg-blue-500 text-white rounded-lg">Отправить</button>
+                <button type="submit" onClick={() => setOpenModalLogout(true)} className="ml-2 p-2 bg-yellow-500 text-white rounded-lg">Выйти из аккаунта</button>
                 {psy ?
                     <button type="button" onClick={handleOpenModal} className="ml-2 p-2 bg-red-500 text-white rounded-lg">Выйти из чата</button>
                     :
