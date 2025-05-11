@@ -15,6 +15,8 @@ export default function ChatPage() {
 
     const userId = getUserId()
 
+
+    console.log(userId, 'userIduserId')
     if (!userId) {
         router.push('/login')
     }

@@ -174,6 +174,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         setInput("");
     };
 
+    console.log(members, 'members')
+
     //@ts-ignore
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -192,11 +194,13 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         //@ts-ignore
         setMessages((prev) => [...prev, userMessage]);
 
+
+
         try {
 
             let data;
 
-            if (chat?.members.length !== 3 && members.length !== 3) {
+            if (chat?.members.length === 1 || chat?.members.length !== 3 && members.length !== 3 && chat?.members.includes('Ассистент')) {
                 const lastFiveMessage = chat ? chat.messages
                     .map((message: any, index: number) =>
                         `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
