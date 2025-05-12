@@ -16,6 +16,8 @@ import { useConsultation } from "@/app/hooks/useConsultation";
 import { usePsyInChat } from "@/app/hooks/usePsyInChat";
 import Modal from '@/components/Modal/Modal'
 import SurveyComponent from "../Survey/SurveyComponent";
+import { IUserResponce } from "@/types/users.types";
+import { IPsyResponce } from "@/types/psy.types";
 
 
 interface IMessage {
@@ -33,6 +35,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [openModalLogout, setOpenModalLogout] = useState(false)
     const [showCallPsyButton, setShowCallPsyButton] = useState(false);
 
+    const [currentUser, setCurrentUser] = useState<IUserResponce | IPsyResponce>()
     const [showSurvey, setShowSurvey] = useState(false)
 
     const router = useRouter()
@@ -49,17 +52,25 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const { callPsychologist } = useCallPsy()
     const { psyInChat } = usePsyInChat()
 
+
+    const userMessage = {
+        position: psy ? "left" : "right",
+        // type: "text",
+        title: psy ? psy.name : user?.name,
+        text: input,
+    };
+
     //@ts-ignore
     const socket = useSocket(userId)
 
     useEffect(() => {
+        setCurrentUser(user ? user : psy)
         updateMessagesInChat();
         if (psy && chatId) {
             callPsychologist(chatId, false)
         }
     }, [messagesInChat, psy, chatId, socket]);
 
-    console.log(chat, 'chattytt')
 
     useEffect(() => {
         if (!socket || !chatId) return;
@@ -70,7 +81,13 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         socket.on("newMessage", (newMessage: IMessage) => {
             console.log("📩 Новое сообщение из WebSocket:", newMessage);
 
-            const reverseMessage = { ...newMessage, position: "left" }
+
+
+            const reverseMessage = currentUser?.name !== newMessage.title
+                ?
+                { ...newMessage, position: 'left' } :
+                { ...newMessage, position: 'right' }
+
 
             setMessages((prev) => {
                 const updatedMessages = [...prev, reverseMessage];
@@ -116,11 +133,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
             socket.off("userLeave");
             socket.off("send-survey");
         };
-    }, [socket, chatId]);
-
-    console.log(user, 'user')
-
-
+    }, [socket, chatId, currentUser]);
 
 
     useEffect(() => {
@@ -131,15 +144,19 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         }
     }, [user, isLoading, router]);
 
-    // useEffect(() => {
-    //     if (!psy && chatId && !chat?.call) {
-    //         const timer = setTimeout(() => {
-    //             setShowCallPsyButton(true);
-    //         }, 3 * 60 * 1000)
+    const updateMessagesInChat = () => {
+        if (messagesInChat) {
+            setMessages(messagesInChat)
 
-    //         return () => clearInterval(timer)
-    //     }
-    // }, [psy, chatId, chat])
+            if (psy && messagesInChat.length > 0) {
+
+                setMessages(messages => messages.map(msg => ({
+                    ...msg,
+                    position: msg.position === 'left' ? 'right' : 'left'
+                })));
+            }
+        }
+    }
 
 
 
@@ -157,24 +174,17 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const sendMessage = () => {
         if (!input.trim()) return;
 
-        updateMessagesInChat();
-
         console.log("📨 Отправка сообщения:", input);
 
-        const userMessage = {
-            position: psy ? "left" : "right",
-            title: psy ? psy.name : user?.name,
-            text: input,
-        };
-        //@ts-ignore
-        setMessages((prev) => [...prev, userMessage]);
+
+        console.log(userMessage, 'userMessage')
 
         socket?.emit("sendMessage", { chatId, message: userMessage });
 
+
+
         setInput("");
     };
-
-    console.log(members, 'members')
 
     //@ts-ignore
     const handleSubmit = async (e) => {
@@ -183,18 +193,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         if (!input.trim()) return;
 
         setInput("");
-
-        const userMessage = {
-            position: psy ? "left" : "right",
-            // type: "text",
-            title: psy ? psy.name : user?.name,
-            text: input,
-        };
-
-        //@ts-ignore
-        setMessages((prev) => [...prev, userMessage]);
-
-
 
         try {
 
@@ -229,23 +227,15 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 };
 
                 //@ts-ignore
-                setMessages((prev) => [...prev, botMessage]);
+                setMessages((prev) => [...prev, userMessage, botMessage]);
 
                 await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage, botMessage] })
             } else {
-                setMessages((prev) => [...prev]);
 
                 sendMessage()
 
                 await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage] })
             }
-
-
-
-            //@ts-ignore
-            queryClient.invalidateQueries(["chat", chatId])
-
-            updateMessagesInChat();
 
             setInput("")
         } catch (error) {
@@ -253,21 +243,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         }
     };
 
-    const updateMessagesInChat = () => {
-        if (messagesInChat) {
-            setMessages(messagesInChat)
 
-            if (psy && messagesInChat.length > 0) {
-                //@ts-ignore
-                setMessages(chat?.messages)
-
-                setMessages(messages => messages.map(msg => ({
-                    ...msg,
-                    position: msg.position === 'left' ? 'right' : 'left'
-                })));
-            }
-        }
-    }
 
     const handleOpenModal = () => {
         setOpenModal(true)
@@ -277,8 +253,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-
-    console.log(messages)
 
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
