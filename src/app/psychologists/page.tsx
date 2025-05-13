@@ -2,6 +2,7 @@
 
 import NotFound from "@/components/NotFound/NotFound";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { getUserId } from "../hooks/getUserId";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
@@ -12,9 +13,15 @@ export default function Psychologists() {
 
     const router = useRouter()
 
-    if (!admin && !isLoading) {
-        return NotFound()
-    }
+    console.log(admin, isLoading)
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!admin) {
+                return NotFound()
+            }
+        }
+    }, [admin])
 
     const toPsychologist = () => {
         router.push('psychologists/create')
