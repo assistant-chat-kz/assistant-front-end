@@ -15,13 +15,13 @@ export default function Psychologists() {
 
     console.log(admin, isLoading)
 
-    // useEffect(() => {
-    //     if (!isLoading) {
-    //         if (!admin) {
-    //             return NotFound()
-    //         }
-    //     }
-    // }, [admin])
+    useEffect(() => {
+        if (!isLoading) {
+            if (!admin) {
+                return NotFound()
+            }
+        }
+    }, [admin])
 
     const toPsychologist = () => {
         router.push('psychologists/create')
