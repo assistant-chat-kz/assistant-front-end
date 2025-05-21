@@ -2,6 +2,9 @@ import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
 
+import Modal from '@/components/Modal/Modal'
+import { useState } from "react";
+
 interface RegisterProps {
     userType: string;
 }
@@ -14,6 +17,8 @@ export default function Register({ userType }: RegisterProps) {
         formState: { errors },
     } = useForm();
 
+    const [openModal, setOpenModal] = useState(false)
+
     const router = useRouter();
 
     const onSubmit = async (data: any) => {
@@ -23,21 +28,35 @@ export default function Register({ userType }: RegisterProps) {
             userType: userType ? userType : undefined
         }
 
-        try {
-            const response = await axiosClassic.post("/auth/register", dataForRegister);
-            // alert("Registration successful");
-            alert("Подождите когда вашу почту подтвердят ");
+        const telecomEmail = data.email.split('@')[1]
 
-            // userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
-            router.push('/login')
-        } catch (error) {
-            //@ts-ignore
-            console.error(error.response?.data?.message || "Registration failed");
+        if (telecomEmail === 'telecom.kz') {
+            try {
+                const response = await axiosClassic.post("/auth/register", dataForRegister);
+                alert("Registration successful");
+                // alert("Подождите когда вашу почту подтвердят ");
+
+                // userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
+                router.push('/login')
+            } catch (error) {
+                //@ts-ignore
+                console.error(error.response?.data?.message || "Registration failed");
+            }
+        } else {
+            setOpenModal(true)
         }
     };
 
+
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+            <Modal title={"Ошибка"}
+                content={"Некорректная почта"}
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+                action={() => setOpenModal(false)}
+                button="accept"
+            />
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
                     {userType === 'admin' ? 'Регистрация админа' : userType === 'psychologist' ? 'Регистрация психолога' : 'Регистрация'}

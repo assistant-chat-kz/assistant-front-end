@@ -6,12 +6,26 @@ interface IModal {
     openModal: boolean
     setOpenModal: Dispatch<SetStateAction<boolean>>
     action: () => void
+    button?: 'accept' | 'cancel'
 }
 
-export default function Modal({ title, content, openModal, setOpenModal, action }: IModal) {
+export default function Modal({ title, content, openModal, setOpenModal, action, button }: IModal) {
 
     const handleCloseModal = () => {
         setOpenModal(!openModal)
+    }
+
+    const buttonRender = () => {
+        if (button) {
+            if (button === 'accept') {
+                return <button type="button" onClick={action} className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto">Принять</button>
+            } else {
+                return <button type="button" onClick={handleCloseModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">Отменить</button>
+            }
+        } else {
+            return <> <button type="button" onClick={action} className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto">Принять</button>
+                <button type="button" onClick={handleCloseModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">Отменить</button></>
+        }
     }
 
     return (
@@ -37,8 +51,7 @@ export default function Modal({ title, content, openModal, setOpenModal, action 
                                 </div>
                             </div>
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                <button type="button" onClick={action} className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto">Принять</button>
-                                <button type="button" onClick={handleCloseModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">Отменить</button>
+                                {buttonRender()}
                             </div>
                         </div>
                     </div>
