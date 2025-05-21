@@ -6,7 +6,7 @@ interface IModal {
     openModal: boolean
     setOpenModal: Dispatch<SetStateAction<boolean>>
     action: () => void
-    button?: 'accept' | 'cancel'
+    button?: 'accept' | 'cancel' | undefined
 }
 
 export default function Modal({ title, content, openModal, setOpenModal, action, button }: IModal) {

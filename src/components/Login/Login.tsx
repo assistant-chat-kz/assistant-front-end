@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 
 import { jwtDecode } from "jwt-decode";
+import Modal from "../Modal/Modal";
+import AssistantChoice from "../AssistantChoice/AssistantChoice";
+import { useState } from "react";
 
 interface ILogin {
     userType: string
@@ -11,6 +14,9 @@ interface ILogin {
 
 export default function Login({ userType }: ILogin) {
     const { register, handleSubmit } = useForm();
+
+    const [openModal, setOpenModal] = useState(false)
+
     const router = useRouter();
 
     const pathname = usePathname()
@@ -46,16 +52,21 @@ export default function Login({ userType }: ILogin) {
             } else if (userTypeData === "psychologist") {
                 router.push("/cabinet");
             } else {
-                router.push(`/chat`);
+                setOpenModal(true)
             }
         } catch (error: any) {
             console.error(error.response?.data?.message || "Login failed");
             alert(error.response?.data?.message || "Ошибка входа");
         }
+
     };
 
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+            <AssistantChoice
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+            />
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
                     {userType === "admin" ? "Войдите как админ" : userType === "psychologist" ? "Войдите как психолог" : "Вход"}
