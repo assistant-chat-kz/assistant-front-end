@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "https://147.182.189.56:4200";
+const SOCKET_SERVER_URL = "https://aikouch.kz";
 
 export const useSocket = (userId: string) => {
     const [socket, setSocket] = useState<Socket | null>(null);
