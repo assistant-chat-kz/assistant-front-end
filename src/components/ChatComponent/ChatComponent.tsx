@@ -267,7 +267,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} psyId={chat?.psy} /> : undefined}
             </div>
 
-            <form onSubmit={handleSubmit} className="flex mt-4">
+            <form onSubmit={handleSubmit} className="flex mt-4 gap-2 flex-wrap">
                 <input
                     type="text"
                     value={input}
