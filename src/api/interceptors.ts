@@ -14,3 +14,5 @@ const options: CreateAxiosDefaults = {
 const axiosClassic = axios.create(options)
 
 export { axiosClassic }
+
+console.log('AXIOS BASE URL:', axiosClassic.defaults.baseURL);
