@@ -209,7 +209,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
                     prompt: `Ты профессиональный психолог-ассистент. 
             Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, 
-            давать полезные советы и помогать пользователю разобраться в своих чувствах. 
+            давать полезные советы и помогать пользователю разобраться в своих чувствах. Если пользователь пишет на другом языке, отвечай на этом языке.
             
             ${lastFiveMessage}
             Пользователь: ${input}
