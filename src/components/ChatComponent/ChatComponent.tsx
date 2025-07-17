@@ -199,11 +199,11 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
             let data;
 
             if (chat?.members.length === 1 || chat?.members.length !== 3 && members.length !== 3 && chat?.members.includes('Ассистент')) {
-                const lastFiveMessage = chat ? chat.messages
-                    .map((message: any, index: number) =>
-                        `${index % 2 === 0 ? 'Пользователь' : 'Психолог'}: ${message?.text}`
-                    )
-                    .join('\n') : ""
+                const lastFiveMessages = chat?.messages?.slice(-10).map((message: any) => {
+                    const role = message.author === "Ассистент" ? "Психолог" : "Пользователь";
+                    return `${role}: ${message.text}`;
+                }).join('\n') || "";
+
 
 
                 const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
@@ -211,12 +211,14 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
             Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, 
             давать полезные советы и помогать пользователю разобраться в своих чувствах. Если пользователь пишет на другом языке, отвечай на этом языке.
             
-            ${lastFiveMessage}
+            ${lastFiveMessages}
             Пользователь: ${input}
             Психолог:`,
                 }));
 
                 data = await res.data;
+
+                console.log(lastFiveMessages)
 
 
                 const botMessage = {
