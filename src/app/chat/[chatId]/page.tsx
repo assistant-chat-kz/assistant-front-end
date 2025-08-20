@@ -15,15 +15,9 @@ export default function ChatPage() {
 
     const userId = getUserId()
 
-
-    console.log(userId, 'userIduserId')
-    if (!userId) {
-        router.push('/login')
-    }
-
-    const { data: chat } = useChat(chatId)
+    const { data: chat, isLoading } = useChat(chatId)
 
     const messagesInChat = chat?.messages
 
-    return <ChatComponent chatId={chatId} messagesInChat={messagesInChat} />;
+    return !isLoading ? <ChatComponent chatId={chatId} messagesInChat={messagesInChat} /> : 'Loading...';
 }

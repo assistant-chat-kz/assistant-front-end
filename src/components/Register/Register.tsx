@@ -37,7 +37,7 @@ export default function Register({ userType }: RegisterProps) {
                 // alert("Подождите когда вашу почту подтвердят ");
 
                 // userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
-                router.push('/login')
+                // router.push('/login')
             } catch (error) {
                 //@ts-ignore
                 console.error(error.response?.data?.message || "Registration failed");

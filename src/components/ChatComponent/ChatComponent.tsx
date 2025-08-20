@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageBox } from "react-chat-elements";
 import { useUser } from "@/app/hooks/useUser";
 import { usePsy } from "@/app/hooks/usePsy";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
@@ -39,7 +39,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [showSurvey, setShowSurvey] = useState(false)
 
     const router = useRouter()
-    const queryClient = useQueryClient();
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
@@ -52,11 +51,17 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const { callPsychologist } = useCallPsy()
     const { psyInChat } = usePsyInChat()
 
+    const searchParams = useSearchParams();
+    const initMessage = searchParams?.get("initMessage");
+
+    console.log(initMessage, 'initMessage')
+
+    const noAuthUserName = user?.name ? user.name : 'Вы'
 
     const userMessage = {
         position: psy ? "left" : "right",
         // type: "text",
-        title: psy ? psy.name : user?.name,
+        title: psy ? psy.name : noAuthUserName,
         text: input,
     };
 
@@ -83,7 +88,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
 
 
-            const reverseMessage = currentUser?.name !== newMessage.title
+            const reverseMessage = currentUser?.name !== newMessage.title && noAuthUserName !== 'Вы'
                 ?
                 { ...newMessage, position: 'left' } :
                 { ...newMessage, position: 'right' }
@@ -136,13 +141,13 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     }, [socket, chatId, currentUser]);
 
 
-    useEffect(() => {
-        if (!isLoading) {
-            if (!psy && !user) {
-                router.push("/login");
-            }
-        }
-    }, [user, isLoading, router]);
+    // useEffect(() => {
+    //     if (!isLoading) {
+    //         if (!psy && !user) {
+    //             router.push("/login");
+    //         }
+    //     }
+    // }, [user, isLoading, router]);
 
     const updateMessagesInChat = () => {
         if (messagesInChat) {
@@ -175,14 +180,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         if (!input.trim()) return;
 
         console.log("📨 Отправка сообщения:", input);
-
-
-        console.log(userMessage, 'userMessage')
-
         socket?.emit("sendMessage", { chatId, message: userMessage });
-
-
-
         setInput("");
     };
 
@@ -218,7 +216,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
                 data = await res.data;
 
-                console.log(lastFiveMessages)
+
 
 
                 const botMessage = {

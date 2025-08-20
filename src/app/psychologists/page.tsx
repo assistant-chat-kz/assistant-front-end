@@ -13,8 +13,6 @@ export default function Psychologists() {
 
     const router = useRouter()
 
-    console.log(admin, isLoading)
-
     useEffect(() => {
         if (!isLoading) {
             if (!admin) {

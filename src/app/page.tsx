@@ -10,11 +10,13 @@ export default function Home() {
 
     const token = localStorage.getItem('accessToken') || '';
 
-    if (!token) {
-      router.push('/login');
-    } else {
-      router.push('/chat')
-    }
+    router.push('/chat')
+
+    // if (!token) {
+    //   router.push('/login');
+    // } else {
+    //   router.push('/chat')
+    // }
   }, [router]);
 
   return (

@@ -15,11 +15,6 @@ export default function Stats() {
     const { data: consultations } = useAllConsultations()
     const { data: users } = useAllUsers()
 
-
-
-
-    console.log(consultations, 'consultations')
-
     // if (!admin && !isLoading) return NotFound()
 
     return (
