@@ -273,12 +273,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-
-
-    useEffect(() => {
-        setShowSurvey(true)
-    }, [])
-
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
             <Modal title={"Подтвердите"} content={"Вы уверены что хотите выйти из чата?"} openModal={openModal} setOpenModal={setOpenModal} action={handleLeaveChat} />
