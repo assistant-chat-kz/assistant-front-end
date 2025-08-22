@@ -25,7 +25,7 @@ export default function Stats() {
 
     return (
         <div>
-            {consultations && users ? <Table users={users} usersNoAuth={usersNoAuth} consultations={consultations} /> : undefined}
+            {consultations && users && usersNoAuth ? <Table users={users} usersNoAuth={usersNoAuth} consultations={consultations} /> : undefined}
         </div>
     )
 }
