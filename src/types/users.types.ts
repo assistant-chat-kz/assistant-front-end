@@ -6,3 +6,7 @@ export interface IUserResponce {
     createdAt: Date;
     verify: boolean
 }
+
+export interface IUserNoAuthResponce {
+    id: string;
+}

@@ -10,6 +10,11 @@ class ConsultationService {
         return response
     }
 
+    async createConsultationNoAuth(chatId: string, userId: string, questions: IQuestionResponce[]) {
+        const response = await axiosClassic.post(`${this.BASE_URL}/createConsultationNoAuth`, { chatId, userId, questions })
+        return response
+    }
+
     async getConsulataionsById(chatId: string, userId: string) {
         const response = await axiosClassic.get(`${this.BASE_URL}/${chatId}`, {
             params: { userId }

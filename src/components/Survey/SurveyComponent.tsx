@@ -5,13 +5,15 @@ import { useState } from "react"
 
 interface ISurveyComponent {
     chatId: string | undefined;
-    user: IUserResponce | undefined;
+    user: IUserResponce | string;
     psyId: string | undefined
 }
 
 export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponent) {
 
     const [endCons, setEndCons] = useState(false)
+
+    console.log(user, 'surveyUser')
 
     console.log(chatId, user, 'chat aqnd user')
 
@@ -37,26 +39,40 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
 
     const sendSurvey = async () => {
         const allAnswersFilled = Object.values(answers).every(value => value !== null);
-        console.log(allAnswersFilled)
+        console.log(allAnswersFilled);
 
-        if (allAnswersFilled) {
-            try {
+        if (!allAnswersFilled) return;
 
-                const response = await axiosClassic.post("/consultation", {
+        try {
+            let response;
+
+            if (typeof user === "string") {
+
+                response = await axiosClassic.post("/consultation/createConsultationNoAuth", {
+                    chatId,
+                    userId: user,
+                    answers,
+                    psyId,
+                });
+            } else {
+
+                response = await axiosClassic.post("/consultation", {
                     chatId,
                     user,
                     answers,
-                    psyId
+                    psyId,
                 });
-
-                setEndCons(true)
-
-
-            } catch (error: any) {
-                console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
             }
+
+            setEndCons(true);
+        } catch (error: any) {
+            console.error(
+                "Ошибка при создании консультации:",
+                error.response?.data?.message || error.message
+            );
         }
-    }
+    };
+
 
     return (
         <div>

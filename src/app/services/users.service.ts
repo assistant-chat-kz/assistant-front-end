@@ -8,6 +8,11 @@ class UserService {
         return response
     }
 
+    async getUsersNoAuth() {
+        const response = await axiosClassic.get(`${this.BASE_URL}/noAuth`)
+        return response
+    }
+
     async getUserById(userId: string) {
         const response = await axiosClassic.get(`${this.BASE_URL}/${userId}`)
         return response

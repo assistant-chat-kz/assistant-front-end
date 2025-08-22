@@ -20,7 +20,7 @@ export default function Table({ users, consultations }: ITable) {
     const { data: chat } = useChat("b4TgMM8krp")
 
 
-    console.log(chat, 'chat')
+    console.log(consultations, 'consultations')
 
 
     return (

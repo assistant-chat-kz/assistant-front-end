@@ -18,6 +18,7 @@ import Modal from '@/components/Modal/Modal'
 import SurveyComponent from "../Survey/SurveyComponent";
 import { IUserResponce } from "@/types/users.types";
 import { IPsyResponce } from "@/types/psy.types";
+import { useAllUsersNoAuth } from "@/app/hooks/useAllUsersNoAuth";
 
 
 interface IMessage {
@@ -38,10 +39,13 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [currentUser, setCurrentUser] = useState<IUserResponce | IPsyResponce>()
     const [showSurvey, setShowSurvey] = useState(false)
 
+    console.log(showSurvey, 'showSurvey')
+
     const router = useRouter()
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
+    console.log(userId, 'userId')
 
     const { data: user, isLoading, error } = useUser(userId)
     const { data: psy, } = usePsy(userId)
@@ -254,6 +258,12 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+
+
+    useEffect(() => {
+        setShowSurvey(true)
+    }, [])
+
     return (
         <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
             <Modal title={"Подтвердите"} content={"Вы уверены что хотите выйти из чата?"} openModal={openModal} setOpenModal={setOpenModal} action={handleLeaveChat} />
@@ -264,7 +274,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
                 <div ref={messagesEndRef} />
-                {showSurvey && user && !psy ? <SurveyComponent chatId={chatId} user={user} psyId={chat?.psy} /> : undefined}
+                {showSurvey && userId && !psy ? <SurveyComponent chatId={chatId} user={user || userId} psyId={chat?.psy} /> : undefined}
             </div>
 
             <form onSubmit={handleSubmit} className="flex mt-4 gap-2 flex-wrap">
