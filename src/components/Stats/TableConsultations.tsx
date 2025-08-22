@@ -7,6 +7,8 @@ interface ITableConsultations {
 
 export default function TableConsultations({ consultations }: ITableConsultations) {
 
+    console.log(consultations, 'consultations')
+
     return (
         <div className="relative overflow-x-auto">
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -28,7 +30,7 @@ export default function TableConsultations({ consultations }: ITableConsultation
                 </thead>
                 {consultations?.map(cons => {
                     const { data: psy } = usePsy(cons.psyId)
-                    console.log(psy, 'psy')
+                    console.log(cons, 'cons')
                     return (
                         <tbody>
                             <tr key={cons.userId} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">

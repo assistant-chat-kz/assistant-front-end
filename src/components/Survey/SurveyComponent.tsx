@@ -47,10 +47,11 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
             let response;
 
             if (typeof user === "string") {
+                console.log(user)
 
                 response = await axiosClassic.post("/consultation/createConsultationNoAuth", {
                     chatId,
-                    userId: user,
+                    user,
                     answers,
                     psyId,
                 });

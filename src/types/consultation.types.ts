@@ -13,4 +13,5 @@ export interface IConsultationResponce {
     userId: string,
     psyId: string,
     questions: IQuestionResponce[]
+    userNoAuthId: string
 }

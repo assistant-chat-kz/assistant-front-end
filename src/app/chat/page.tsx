@@ -8,6 +8,7 @@ import { chatService } from "../services/chat.service";
 import { useEffect } from "react";
 import { axiosClassic } from "@/api/interceptors";
 
+
 export default function Chat() {
     const { data: chats, isLoading } = useAllChats();
     const router = useRouter();
@@ -15,6 +16,8 @@ export default function Chat() {
     const userId: any = getUserId();
     const userIdNoAuth = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const currentUserId = userId ? userId : userIdNoAuth;
+
+
 
     useEffect(() => {
         const initChat = async () => {

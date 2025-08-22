@@ -22,6 +22,11 @@ class UserService {
         const response = await axiosClassic.put(`${this.BASE_URL}/${userId}`)
         return response
     }
+
+    async visitUser(userId: string) {
+        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}/visit`)
+        return response
+    }
 }
 
 export const userService = new UserService()

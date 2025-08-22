@@ -6,6 +6,7 @@ import { useAllConsultations } from "../hooks/useAllConsultations";
 import Table from "@/components/Stats/Table";
 import { useAllUsers } from "../hooks/useAllUsers";
 import { useAllChats } from "../hooks/useAllChats";
+import { useAllUsersNoAuth } from "../hooks/useAllUsersNoAuth";
 
 export default function Stats() {
 
@@ -16,14 +17,15 @@ export default function Stats() {
 
     const { data: consultations } = useAllConsultations()
     const { data: users } = useAllUsers()
+    const { data: usersNoAuth } = useAllUsersNoAuth()
 
     // if (!admin && !isLoading) return NotFound()
 
-    console.log(chats, 'chats')
+    console.log(usersNoAuth, 'usersNoAuth')
 
     return (
         <div>
-            {consultations && users ? <Table users={users} consultations={consultations} /> : undefined}
+            {consultations && users ? <Table users={users} usersNoAuth={usersNoAuth} consultations={consultations} /> : undefined}
         </div>
     )
 }

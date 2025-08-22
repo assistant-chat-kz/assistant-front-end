@@ -19,6 +19,7 @@ import SurveyComponent from "../Survey/SurveyComponent";
 import { IUserResponce } from "@/types/users.types";
 import { IPsyResponce } from "@/types/psy.types";
 import { useAllUsersNoAuth } from "@/app/hooks/useAllUsersNoAuth";
+import { userService } from "@/app/services/users.service";
 
 
 interface IMessage {
@@ -58,7 +59,21 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const searchParams = useSearchParams();
     const initMessage = searchParams?.get("initMessage");
 
-    console.log(initMessage, 'initMessage')
+    const visitUser = async () => {
+        try {
+            if (userId) {
+                const response = await userService.visitUser(userId);
+                console.log("+ Визит");
+            }
+        } catch (e) {
+            console.error("Ошибка", e);
+        }
+    };
+
+    useEffect(() => {
+        visitUser();
+    }, [userId]);
+
 
     const noAuthUserName = user?.name ? user.name : 'Вы'
 

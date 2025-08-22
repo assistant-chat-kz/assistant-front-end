@@ -12,7 +12,8 @@ export default function StatsId() {
     const { data: consultations } = useAllConsultations()
     const { data: users } = useAllUsers()
 
-    const consultationFilter = consultations?.filter(cons => params.stats === cons.userId)
+    const consultationFilter = consultations?.filter(cons => params.stats === cons.userId || params.stats === cons.userNoAuthId)
+    console.log(consultations, 'consultationsconsultations')
 
     return (
         //@ts-ignore

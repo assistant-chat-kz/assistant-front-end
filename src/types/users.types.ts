@@ -5,8 +5,10 @@ export interface IUserResponce {
     email: string;
     createdAt: Date;
     verify: boolean
+    visits: number
 }
 
 export interface IUserNoAuthResponce {
     id: string;
+    visits: number
 }
