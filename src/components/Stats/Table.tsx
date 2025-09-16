@@ -28,10 +28,14 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
         return (
             <tr onClick={() => toStatsId(user.id)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                 <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                    {`${user.name || user.id} ${user.surname || ""}`}
+                    {"name" in user
+                        ? `${user.name} ${user.surname || ""}`
+                        : user.id}
                 </th>
                 <td className="px-6 py-4">
-                    {user.email || ""}
+                    <td className="px-6 py-4">
+                        {"email" in user ? user.email : ""}
+                    </td>
                 </td>
                 <td className="px-6 py-4">
                     {consultations?.filter(cons => cons.userId === user.id).length}
