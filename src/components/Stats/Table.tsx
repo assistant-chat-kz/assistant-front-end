@@ -1,7 +1,8 @@
 import { IConsultationResponce } from "@/types/consultation.types";
 import { IUserNoAuthResponce, IUserResponce } from "@/types/users.types"
 import { useRouter } from "next/navigation";
-import { useChat } from '../../app/hooks/useChat'
+import { useAllChats } from "@/app/hooks/useAllChats";
+import { useChat } from "@/app/hooks/useChat";
 
 interface ITable {
     users: IUserResponce[];
@@ -13,16 +14,37 @@ interface ITable {
 export default function Table({ users, usersNoAuth, consultations }: ITable) {
 
     const router = useRouter();
+    const { data: chats } = useAllChats()
 
     const toStatsId = (id: string) => {
         router.push(`stats/${id}`)
     }
 
-    const { data: chat } = useChat("b4TgMM8krp")
+    function UserRow({ user, consultations }: { user: IUserResponce | IUserNoAuthResponce, consultations: IConsultationResponce[] }) {
+        const currentChat = chats?.find(chat => chat.members.find(item => item === user.id))
+        const { data: chat } = useChat(currentChat?.chatId)
 
-
-    console.log(consultations, 'consultations')
-
+        console.log(chat, 'chat')
+        return (
+            <tr onClick={() => toStatsId(user.id)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
+                    {`${user.name || user.id} ${user.surname || ""}`}
+                </th>
+                <td className="px-6 py-4">
+                    {user.email || ""}
+                </td>
+                <td className="px-6 py-4">
+                    {consultations?.filter(cons => cons.userId === user.id).length}
+                </td>
+                <td className="px-6 py-4">
+                    {user?.visits}
+                </td>
+                <td className="px-6 py-4">
+                    {chat?.messages?.length ?? 0} сообщений
+                </td>
+            </tr>
+        )
+    }
 
 
 
@@ -47,36 +69,10 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
                 </thead>
                 <tbody>
                     {users?.map(user => (
-                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                            <th onClick={() => toStatsId(user.id)} scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                                {`${user.name} ${user.surname}`}
-                            </th>
-                            <td className="px-6 py-4">
-                                {user.email}
-                            </td>
-                            <td className="px-6 py-4">
-                                {consultations?.filter(cons => cons.userId === user.id).length}
-                            </td>
-                            <td className="px-6 py-4">
-                                {user?.visits}
-                            </td>
-                        </tr>
+                        <UserRow key={user.id} user={user} consultations={consultations} />
                     ))}
                     {usersNoAuth?.map(user => (
-                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                            <th onClick={() => toStatsId(user.id)} scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                                {`${user.id}`}
-                            </th>
-                            <td className="px-6 py-4">
-                                {/* {user.email} */}
-                            </td>
-                            <td className="px-6 py-4">
-                                {consultations?.filter(cons => cons.chatId === user.id).length}
-                            </td>
-                            <td className="px-6 py-4">
-                                {user?.visits}
-                            </td>
-                        </tr>
+                        <UserRow key={user.id} user={user} consultations={consultations} />
                     ))}
                 </tbody>
             </table>
