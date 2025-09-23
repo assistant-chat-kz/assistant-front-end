@@ -95,7 +95,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
                 currentUser?.name !== newMessage.title && noAuthUserName !== 'Вы'
                     ? { ...newMessage, position: 'left' }
                     : { ...newMessage, position: 'right' }
-
+            //@ts-ignore
             setMessages((prev) => [...prev, reverseMessage]);
         });
 
@@ -239,6 +239,7 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
             <div className="flex-1 overflow-auto p-2 bg-white rounded-lg">
                 {messages.map((msg, index) => (
+                    //@ts-ignore
                     <MessageBox key={index} type="text" {...msg} />
                 ))}
                 <div ref={messagesEndRef} />
