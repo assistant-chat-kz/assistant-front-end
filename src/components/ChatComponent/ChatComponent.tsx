@@ -256,6 +256,7 @@ ${lastMessages}
                 await new Promise(resolve => setTimeout(resolve, 800));
 
                 setMessages((prev) => [
+                    //@ts-ignore
                     ...prev.filter((m) => !m.typing),
                     { position: "left", title: "Ассистент", text: responseText },
                 ]);
