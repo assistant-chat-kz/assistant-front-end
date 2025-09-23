@@ -203,64 +203,73 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         setInput("");
     };
 
-    //@ts-ignore
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Дополнительно можно хранить summary в состоянии
+    const [summary, setSummary] = useState<string>("");
 
+    // Вынесем генерацию ответа в отдельную функцию
+    const generateAssistantResponse = async (input: string, chat: any) => {
+        const lastMessages = chat?.messages?.slice(-10).map((message: any) => {
+            const role = message.author === "Ассистент" ? "Психолог" : "Пользователь";
+            return `${role}: ${message.text}`;
+        }).join('\n') || "";
+
+        const prompt = `
+Ты профессиональный психолог-ассистент.
+Твоя задача — поддерживать пользователя, давать советы и помогать разобраться в чувствах.
+Отвечай коротко и по делу. Если пользователь пишет на другом языке — отвечай на том же языке.
+Обязательно сохраняй последовательность и учитывай предыдущий контекст.
+
+Краткое резюме диалога:
+${summary || "Пока нет"}
+
+Последние сообщения:
+${lastMessages}
+
+Пользователь: ${input}
+Психолог:
+`;
+
+        const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({ prompt }));
+        return res.data.response;
+    };
+
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
         if (!input.trim()) return;
 
+        const messageText = input;
         setInput("");
 
+        const newUserMessage = {
+            position: psy ? "left" : "right",
+            title: psy ? psy.name : noAuthUserName,
+            text: messageText,
+        };
+
         try {
+            if (chat?.members.length === 1 || (chat?.members.length !== 3 && members.length !== 3 && chat?.members.includes('Ассистент'))) {
+                const typingMessage = { position: "left", title: "Ассистент", text: "Печатает...", typing: true };
+                setMessages((prev) => [...prev, newUserMessage, typingMessage]);
 
-            let data;
+                const responseText = await generateAssistantResponse(messageText, chat);
 
-            if (chat?.members.length === 1 || chat?.members.length !== 3 && members.length !== 3 && chat?.members.includes('Ассистент')) {
-                const lastFiveMessages = chat?.messages?.slice(-10).map((message: any) => {
-                    const role = message.author === "Ассистент" ? "Психолог" : "Пользователь";
-                    return `${role}: ${message.text}`;
-                }).join('\n') || "";
+                await new Promise(resolve => setTimeout(resolve, 800));
 
-
-
-                const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
-                    prompt: `Ты профессиональный психолог-ассистент. 
-            Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, 
-            давать полезные советы и помогать пользователю разобраться в своих чувствах. Если пользователь пишет на другом языке, отвечай на этом языке. Давай конкретные рекомендации чтобы помочь человеку.
-            
-            ${lastFiveMessages}
-            Пользователь: ${input}
-            Психолог:`,
-                }));
-
-                data = await res.data;
-
-
-
-
-                const botMessage = {
-                    position: "left",
-                    // type: "text",
-                    title: "Ассистент",
-                    text: data.response,
-                };
-
-                //@ts-ignore
-                setMessages((prev) => [...prev, userMessage, botMessage]);
-
-                await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage, botMessage] })
+                setMessages((prev) => [
+                    ...prev.filter((m) => !m.typing),
+                    { position: "left", title: "Ассистент", text: responseText },
+                ]);
             } else {
-
-                sendMessage()
-
-                await axiosClassic.put(`/chat/${chatId}`, { chatId: chatId, messages: [userMessage] })
+                sendMessage();
+                setMessages((prev) => [...prev, newUserMessage]);
+                await axiosClassic.put(`/chat/${chatId}`, { chatId, messages: [newUserMessage] });
             }
-
-            setInput("")
         } catch (error) {
-            console.error("Error fetching response:", error);
+            console.error("Ошибка при генерации ответа:", error);
         }
     };
+
+
 
 
 
