@@ -47,6 +47,23 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const searchParams = useSearchParams();
     const initMessage = searchParams?.get("initMessage");
 
+    const [theme, setTheme] = useState<"light" | "dark">("light");
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("theme") as "light" | "dark";
+        if (savedTheme) {
+            setTheme(savedTheme);
+            document.body.classList.toggle("dark", savedTheme === "dark");
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+        document.body.classList.toggle("dark", newTheme === "dark");
+    };
+
     const visitUser = async () => {
         try {
             if (userId) {
@@ -220,80 +237,99 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     }, [messages]);
 
     return (
-        <div className="h-[100dvh] flex flex-col mx-auto border border-gray-300 p-4 rounded-lg overflow-hidden">
-            <Modal
-                title={"Подтвердите"}
-                content={"Вы уверены что хотите выйти из чата?"}
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-                action={handleLeaveChat}
-            />
+        <div
+            className={`flex flex-col h-[100dvh] mx-auto border overflow-hidden transition-colors ${theme === "light"
+                ? "bg-gray-50 border-gray-300 text-gray-900"
+                : "bg-gray-900 border-gray-700 text-gray-100"
+                }`}
+        >
+            {/* Header */}
+            <div
+                className={`flex items-center justify-between p-4 border-b ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"
+                    }`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl">
+                            🤖
+                        </div>
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                    </div>
+                    <div>
+                        <h1 className="font-semibold text-lg">{psy ? psy.name : "Ассистент"}</h1>
+                        <p className="text-sm opacity-70">
+                            {psy ? "В сети • Психолог" : "В сети • Ассистент"}
+                        </p>
+                    </div>
+                </div>
 
-            <Modal
-                title={"Подтвердите"}
-                content={"Вы уверены что хотите выйти из аккаунта?"}
-                openModal={openModalLogout}
-                setOpenModal={setOpenModalLogout}
-                action={handleLogout}
-            />
-
-            <div className="flex-1 overflow-auto p-2 bg-white rounded-lg">
-                {messages.map((msg, index) => (
-                    //@ts-ignore
-                    <MessageBox key={index} type="text" {...msg} />
-                ))}
-                <div ref={messagesEndRef} />
-
-                {showSurvey && userId && !psy
-                    ? <SurveyComponent chatId={chatId} user={user || userId} psyId={chat?.psy} />
-                    : undefined}
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex mt-4 gap-2 flex-wrap">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    className="flex-1 p-2 border border-gray-300 rounded-lg"
-                />
-                <button type="submit" className="ml-2 p-2 bg-blue-500 text-white rounded-lg">
-                    Отправить
-                </button>
+                {/* Кнопка смены темы */}
                 <button
                     type="button"
-                    onClick={() => setOpenModalLogout(true)}
-                    className="ml-2 p-2 bg-yellow-500 text-white rounded-lg"
+                    onClick={toggleTheme}
+                    className="text-xl cursor-pointer"
                 >
-                    Выйти из аккаунта
+                    {theme === "light" ? "🌙" : "☀️"}
                 </button>
+            </div>
 
-                {psy ? (
-                    <button
-                        type="button"
-                        onClick={handleOpenModal}
-                        className="ml-2 p-2 bg-red-500 text-white rounded-lg"
+            {/* Messages */}
+            <div className="flex-1 overflow-auto p-4">
+                {messages.map((msg, index) => (
+                    <div
+                        key={index}
+                        className={`flex mb-3 ${msg.position === "right" ? "justify-end" : "justify-start"
+                            }`}
                     >
-                        Выйти из чата
-                    </button>
-                ) : !showCallPsyButton ? (
-                    chat?.call ? (
-                        <button
-                            type="button"
-                            className="ml-2 p-2 bg-red-500 text-white rounded-lg"
+                        <div
+                            className={`px-4 py-2 rounded-2xl max-w-[70%] ${msg.position === "right"
+                                ? "bg-blue-500 text-white rounded-br-none"
+                                : theme === "light"
+                                    ? "bg-gray-200 text-gray-900 rounded-bl-none"
+                                    : "bg-gray-700 text-gray-100 rounded-bl-none"
+                                }`}
                         >
-                            Вы вызвали психолога
-                        </button>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => callPsychologist(chatId, true)}
-                            className="ml-2 p-2 bg-green-500 text-white rounded-lg"
-                        >
-                            Позвать психолога
-                        </button>
-                    )
-                ) : undefined}
+                            {msg.text}
+                        </div>
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <form
+                onSubmit={handleSubmit}
+                className={`border-t p-3 flex items-center gap-2 ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"
+                    }`}
+            >
+                <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Напишите сообщение..."
+                    className={`flex-1 resize-none p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 ${theme === "light"
+                        ? "bg-white border-gray-300 text-gray-900"
+                        : "bg-gray-900 border-gray-700 text-gray-100"
+                        }`}
+                    rows={1}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSubmit(e);
+                        }
+                    }}
+                />
+                <button
+                    type="submit"
+                    disabled={!input.trim()}
+                    className={`px-4 py-2 rounded-lg text-white ${input.trim()
+                        ? "bg-blue-500 hover:bg-blue-600"
+                        : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
+                        }`}
+                >
+                    ➤
+                </button>
             </form>
         </div>
     );
+
 }

@@ -14,8 +14,43 @@
   }
 } */
 
+html, body {
+  @apply h-full w-full m-0 p-0;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-gray-50 text-gray-900 transition-colors;
+}
+
+body.dark {
+  @apply bg-gray-900 text-gray-100;
+}
+
+
+body::-webkit-scrollbar,
+div::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body::-webkit-scrollbar-track,
+div::-webkit-scrollbar-track {
+  background: #f3f4f6; 
+}
+
+body::-webkit-scrollbar-thumb,
+div::-webkit-scrollbar-thumb {
+  background-color: #9ca3af; 
+  border-radius: 6px;
+}
+
+/* ===== СКРОЛЛБАР ТЁМНАЯ ТЕМА ===== */
+body.dark::-webkit-scrollbar-track,
+div.dark::-webkit-scrollbar-track {
+  background: #1f2937; /* тёмный трек */
+}
+
+body.dark::-webkit-scrollbar-thumb,
+div.dark::-webkit-scrollbar-thumb {
+  background-color: #4b5563; /* тёмный ползунок */
 }
