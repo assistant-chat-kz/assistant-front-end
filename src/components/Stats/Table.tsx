@@ -23,11 +23,11 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
     function UserRow({ user, consultations }: { user: IUserResponce | IUserNoAuthResponce, consultations: IConsultationResponce[] }) {
         const currentChat = chats?.find(chat => chat.members.find(item => item === user.id))
         const { data: chat } = useChat(currentChat?.chatId)
-
         return (
             <tr onClick={() => toStatsId(user.id)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                 <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                    {"name" in user
+                    {"name" in user && user?.name !== null
+                        //@ts-ignore
                         ? `${user.name} ${user.surname || ""}`
                         : user.id}
                 </th>

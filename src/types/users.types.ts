@@ -11,4 +11,5 @@ export interface IUserResponce {
 export interface IUserNoAuthResponce {
     id: string;
     visits: number
+    name?: string
 }
