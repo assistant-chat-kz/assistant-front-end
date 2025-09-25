@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction, useState } from "react"
 interface IModalChoice {
     openModal: boolean
     setOpenModal: Dispatch<SetStateAction<boolean>>
-    userId: string
+    userId: string | undefined
 }
 
 export default function SetNameModal({ openModal, setOpenModal, userId }: IModalChoice) {
@@ -19,6 +19,7 @@ export default function SetNameModal({ openModal, setOpenModal, userId }: IModal
     }
 
     const updateNameForUser = async () => {
+        //@ts-ignore
         await userService.updateUser(userId, { name })
     }
 
