@@ -24,7 +24,6 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
         const currentChat = chats?.find(chat => chat.members.find(item => item === user.id))
         const { data: chat } = useChat(currentChat?.chatId)
 
-        console.log(consultations, 'consultations')
         return (
             <tr onClick={() => toStatsId(user.id)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                 <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
@@ -48,13 +47,14 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
                         ? chat.messages.filter(msg => {
                             const date = new Date(msg.createdAt);
                             const now = new Date();
-                            const weekAgo = new Date();
-                            weekAgo.setDate(now.getDate() - 7);
+                            const daysAgo = new Date();
+                            daysAgo.setDate(now.getDate() - 14); // <-- изменили на 14 дней
 
-                            return date >= weekAgo && date <= now;
+                            return date >= daysAgo && date <= now;
                         }).length
                         : 0} сообщений
                 </td>
+
 
 
 

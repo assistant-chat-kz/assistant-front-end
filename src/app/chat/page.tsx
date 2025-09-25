@@ -17,7 +17,7 @@ export default function Chat() {
     const userIdNoAuth = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const currentUserId = userId ? userId : userIdNoAuth;
 
-
+    console.log(currentUserId, "user")
 
     useEffect(() => {
         const initChat = async () => {

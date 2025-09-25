@@ -1,4 +1,5 @@
 import { axiosClassic } from "@/api/interceptors";
+import { IUserNoAuthResponce, IUserResponce } from "@/types/users.types";
 
 class UserService {
     private BASE_URL = '/users'
@@ -26,6 +27,10 @@ class UserService {
     async visitUser(userId: string) {
         const response = await axiosClassic.put(`${this.BASE_URL}/${userId}/visit`)
         return response
+    }
+
+    async updateUser(userId: string, data: Partial<IUserResponce> | Partial<IUserNoAuthResponce>) {
+        return axiosClassic.put(`${this.BASE_URL}/${userId}`, data)
     }
 }
 

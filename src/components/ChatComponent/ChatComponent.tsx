@@ -23,7 +23,7 @@ interface IMessage {
     text: string;
 }
 
-export default function ChatComponent({ chatId, messagesInChat }: { chatId?: string; messagesInChat?: any[] }) {
+export default function ChatComponent({ chatId, user, messagesInChat }: { chatId?: string; user?: IUserResponce; messagesInChat?: any[] }) {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [input, setInput] = useState("");
     const [members, setMembers] = useState<any>([])
@@ -33,12 +33,13 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
     const [currentUser, setCurrentUser] = useState<IUserResponce | IPsyResponce>()
     const [showSurvey, setShowSurvey] = useState(false)
 
+
+
     const router = useRouter()
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
 
-    const { data: user, isLoading } = useUser(userId)
     const { data: psy } = usePsy(userId)
     const { data: chat } = useChat(chatId)
     const { data: consultation } = useConsultation(chatId, userId)
@@ -68,7 +69,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         try {
             if (userId) {
                 await userService.visitUser(userId);
-                console.log("+ Визит");
             }
         } catch (e) {
             console.error("Ошибка", e);
@@ -103,10 +103,8 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         if (!socket || !chatId) return;
 
         socket.emit("joinChat", chatId);
-        console.log(`🔗 Присоединился к чату: ${chatId}`);
 
         socket.on("newMessage", (newMessage: IMessage) => {
-            console.log("📩 Новое сообщение из WebSocket:", newMessage);
 
             const reverseMessage =
                 currentUser?.name !== newMessage.title && noAuthUserName !== 'Вы'
@@ -117,7 +115,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         });
 
         socket.on("userJoined", ({ members: newMembers }) => {
-            console.log("👤 Обновленный список участников:", newMembers);
             if (psy) psyInChat(chatId, psy.id)
 
             setMembers((prev: any) => {
@@ -127,7 +124,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         });
 
         socket.on("userLeave", ({ userId, members: newMembers }) => {
-            console.log(`🚪 Пользователь ${userId} вышел из чата, обновляем участников`, newMembers);
             setMembers((prev: any) => {
                 const isDifferent = JSON.stringify(prev) !== JSON.stringify(newMembers);
                 return isDifferent ? newMembers : prev;
@@ -135,7 +131,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         });
 
         socket.on("send-survey", ({ chatId }) => {
-            console.log("📋 Пришёл опрос:", chatId);
             setShowSurvey(true);
         });
 
@@ -185,7 +180,6 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
         try {
             let data;
 
-            // если чат только с ботом
             if (chat?.members.length === 1 || chat?.members.length !== 3 && members.length !== 3 && chat?.members.includes('Ассистент')) {
                 const lastFiveMessages =
                     chat?.messages?.slice(-10).map((message: any) => {
@@ -207,13 +201,11 @@ export default function ChatComponent({ chatId, messagesInChat }: { chatId?: str
 
                 setMessages((prev) => [...prev, messageToSend, botMessage]);
 
-                // сохраняем в БД и пользователя, и ответ бота
                 await axiosClassic.put(`/chat/${chatId}`, {
                     chatId: chatId,
                     messages: [messageToSend, botMessage]
                 })
             } else {
-                // если живой собеседник
                 socket?.emit("sendMessage", { chatId, message: messageToSend })
                 setMessages((prev) => [...prev, messageToSend]);
 

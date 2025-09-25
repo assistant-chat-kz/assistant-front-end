@@ -11,8 +11,6 @@ export default function VerifyUsers() {
 
     const noVerifyUsers = users?.filter(user => !user.verify)
 
-    console.log(noVerifyUsers, 'noVerifyUsers')
-
     const verifyUser = async (user: IUserResponce) => {
         try {
             if (!user.verify) {

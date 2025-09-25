@@ -13,10 +13,6 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
 
     const [endCons, setEndCons] = useState(false)
 
-    console.log(user, 'surveyUser')
-
-    console.log(chatId, user, 'chat aqnd user')
-
     const questionsArray = [
         '1.Насколько вы довольны этой консультацией?',
         '2.Как вы себя чувствуете после сессии по сравнению с тем, как чувствовали себя до неё?',
@@ -39,7 +35,6 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
 
     const sendSurvey = async () => {
         const allAnswersFilled = Object.values(answers).every(value => value !== null);
-        console.log(allAnswersFilled);
 
         if (!allAnswersFilled) return;
 
@@ -47,7 +42,6 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
             let response;
 
             if (typeof user === "string") {
-                console.log(user)
 
                 response = await axiosClassic.post("/consultation/createConsultationNoAuth", {
                     chatId,

@@ -21,6 +21,12 @@ export default function Login({ userType }: ILogin) {
 
     const pathname = usePathname()
 
+    const theme = localStorage.getItem('theme')
+
+    if (theme === 'dark') {
+        localStorage.setItem('theme', 'light')
+    }
+
     const onSubmit = async (data: any) => {
         try {
             let response;

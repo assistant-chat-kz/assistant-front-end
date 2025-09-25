@@ -19,10 +19,6 @@ export default function Stats() {
     const { data: users } = useAllUsers()
     const { data: usersNoAuth } = useAllUsersNoAuth()
 
-    // if (!admin && !isLoading) return NotFound()
-
-    console.log(usersNoAuth, 'usersNoAuth')
-
     return (
         <div>
             {consultations && users && usersNoAuth ? <Table users={users} usersNoAuth={usersNoAuth} consultations={consultations} /> : undefined}
