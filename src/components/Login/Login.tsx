@@ -23,8 +23,6 @@ export default function Login({ userType }: ILogin) {
 
     const pathname = usePathname()
 
-    const theme = localStorage.getItem('theme')
-
     useEffect(() => {
         if (typeof window !== "undefined") {
             const theme = localStorage.getItem("theme");
