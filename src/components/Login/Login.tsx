@@ -1,3 +1,5 @@
+"use client"
+
 import { useForm } from "react-hook-form";
 import { axiosClassic } from "@/api/interceptors";
 import { useRouter } from "next/navigation";
@@ -6,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import Modal from "../Modal/Modal";
 import AssistantChoice from "../AssistantChoice/AssistantChoice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ILogin {
     userType: string
@@ -23,11 +25,16 @@ export default function Login({ userType }: ILogin) {
 
     const theme = localStorage.getItem('theme')
 
-    if (theme === 'dark') {
-        localStorage.setItem("theme", "light");
-        document.body.classList.remove("dark");
-        document.body.classList.add("light");
-    }
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const theme = localStorage.getItem("theme");
+            if (theme === "dark") {
+                localStorage.setItem("theme", "light");
+                document.body.classList.remove("dark");
+                document.body.classList.add("light");
+            }
+        }
+    }, []);
 
 
     const onSubmit = async (data: any) => {
