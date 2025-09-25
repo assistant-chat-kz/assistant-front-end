@@ -16,6 +16,7 @@ import SurveyComponent from "../Survey/SurveyComponent";
 import { IUserResponce } from "@/types/users.types";
 import { IPsyResponce } from "@/types/psy.types";
 import { userService } from "@/app/services/users.service";
+import { LogOut } from "lucide-react";
 
 interface IMessage {
     position: "left" | "right";
@@ -193,6 +194,8 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
 
                 data = await res.data;
 
+
+
                 const botMessage: IMessage = {
                     position: "left",
                     title: "Ассистент",
@@ -228,13 +231,30 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    const openModalForExit = () => {
+        psy ? setOpenModal(true) : setOpenModalLogout(true)
+    }
+
     return (
+
+
+
         <div
             className={`flex flex-col h-[100dvh] mx-auto border overflow-hidden transition-colors ${theme === "light"
                 ? "bg-gray-50 border-gray-300 text-gray-900"
                 : "bg-gray-900 border-gray-700 text-gray-100"
                 }`}
         >
+            <Modal title={"Подтвердите"}
+                content={"Вы уверены что хотите выйти из чата?"}
+                openModal={openModal} setOpenModal={setOpenModal}
+                action={handleLeaveChat} />
+
+            <Modal title={"Подтвердите"}
+                content={"Вы уверены что хотите выйти из аккаунта?"}
+                openModal={openModalLogout}
+                setOpenModal={setOpenModalLogout}
+                action={handleLogout} />
             {/* Header */}
             <div
                 className={`flex items-center justify-between p-4 border-b ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"
@@ -255,14 +275,21 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                     </div>
                 </div>
 
-                {/* Кнопка смены темы */}
-                <button
-                    type="button"
-                    onClick={toggleTheme}
-                    className="text-xl cursor-pointer"
-                >
-                    {theme === "light" ? "🌙" : "☀️"}
-                </button>
+                <div className="flex gap-[30px]">
+                    {/* Кнопка смены темы */}
+                    <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="text-xl cursor-pointer"
+                    >
+                        {theme === "light" ? "🌙" : "☀️"}
+                    </button>
+
+                    {/* Кнопка выхода из аккаунта или чата */}
+                    <button onClick={() => openModalForExit()}>
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
             {/* Messages */}

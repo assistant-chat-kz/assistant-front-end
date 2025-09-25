@@ -24,8 +24,11 @@ export default function Login({ userType }: ILogin) {
     const theme = localStorage.getItem('theme')
 
     if (theme === 'dark') {
-        localStorage.setItem('theme', 'light')
+        localStorage.setItem("theme", "light");
+        document.body.classList.remove("dark");
+        document.body.classList.add("light");
     }
+
 
     const onSubmit = async (data: any) => {
         try {

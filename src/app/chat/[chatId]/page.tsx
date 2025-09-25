@@ -27,13 +27,16 @@ export default function ChatPage() {
 
     useEffect(() => {
         if (!isLoadinUser) {
+
             if (user?.name) {
                 setOpenModal(false)
             } else {
                 setOpenModal(true)
             }
         }
-    }, [])
+    }, [isLoadinUser, user])
+
+    console.log(userId, 'useruser')
 
     return (
         <div>
