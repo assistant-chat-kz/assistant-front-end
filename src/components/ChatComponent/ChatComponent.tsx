@@ -17,6 +17,8 @@ import { IUserResponce } from "@/types/users.types";
 import { IPsyResponce } from "@/types/psy.types";
 import { userService } from "@/app/services/users.service";
 import { LogOut } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface IMessage {
     position: "left" | "right";
@@ -189,7 +191,37 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                     }).join('\n') || "";
 
                 const res = await axiosClassic.post("yandex-gpt/generate", JSON.stringify({
-                    prompt: `Ты профессиональный психолог-ассистент. Отправляй ТОЛЬКО короткие ответы. Общайся так, чтобы поддерживать, давать полезные советы и помогать пользователю разобраться в своих чувствах. Если пользователь пишет на другом языке, отвечай на этом языке. Давай конкретные рекомендации чтобы помочь человеку. ${lastFiveMessages} Пользователь: ${input} Психолог:`,
+                    prompt: `Ты профессиональный психолог-ассистент. 
+Ты ведёшь живой, человечный, доброжелательный разговор, помогая человеку понять себя, свои чувства и переживания. 
+Ты не начинаешь каждое сообщение с приветствия или фраз вроде "Привет!" — просто продолжай диалог естественно, как если бы вы уже разговаривали. 
+Твоя речь мягкая, поддерживающая, но не сухая. 
+Если человек выражает эмоции — покажи понимание, объясни, почему он может это чувствовать, и предложи пути, как разобраться в себе. 
+Объясняй, зачем ты предлагаешь советы и как они могут помочь. 
+Избегай шаблонных фраз, будь искренним и вовлечённым. 
+Оформляй сообщения красиво, добавляй смайлики или эмодзи когда это уместно
+
+Если нужно дать план/шаги — отвечай **только в Markdown** в следующем стиле:
+
+## Краткий заголовок (одно предложение)
+
+Краткое эмпатичное вступление (1–2 предложения).
+
+1. **Шаг 1 — Короткое название.** Короткое объяснение (1–2 предложения).
+2. **Шаг 2 — Короткое название.** Короткое объяснение.
+3. **Шаг 3 — ...**
+
+Короткая поддержка/призыв к действию (1 предложение).
+
+Ничего лишнего до или после Markdown. Если пользователь просит «коротко», делай шаги короче, но сохраняй эмпатию.
+
+
+Последние сообщения чата:
+${lastFiveMessages}
+
+Пользователь: ${input}
+Психолог:`
+
+
                 }));
 
                 data = await res.data;
@@ -236,8 +268,6 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
     }
 
     return (
-
-
 
         <div
             className={`flex flex-col h-[100dvh] mx-auto border overflow-hidden transition-colors ${theme === "light"
@@ -294,6 +324,7 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
 
             {/* Messages */}
             <div className="flex-1 overflow-auto p-4">
+
                 {messages.map((msg, index) => (
                     <div
                         key={index}
@@ -308,7 +339,7 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                                     : "bg-gray-700 text-gray-100 rounded-bl-none"
                                 }`}
                         >
-                            {msg.text}
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                         </div>
                     </div>
                 ))}
