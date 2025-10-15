@@ -83,7 +83,11 @@ export default function Login({ userType }: ILogin) {
             />
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-                    {userType === "admin" ? "Войдите как админ" : userType === "psychologist" ? "Войдите как психолог" : "Вход"}
+                    {userType === "admin"
+                        ? "Sign in as admin"
+                        : userType === "psychologist"
+                            ? "Sign in as psychologist"
+                            : "Sign in"}
                 </h2>
             </div>
 
@@ -94,7 +98,7 @@ export default function Login({ userType }: ILogin) {
                             htmlFor="email"
                             className="block text-sm font-medium text-gray-900"
                         >
-                            Адрес электронной почты
+                            Email address
                         </label>
                         <div className="mt-2">
                             <input
@@ -113,7 +117,7 @@ export default function Login({ userType }: ILogin) {
                             htmlFor="password"
                             className="block text-sm font-medium text-gray-900"
                         >
-                            Пароль
+                            Password
                         </label>
                         <div className="mt-2">
                             <input
@@ -132,21 +136,22 @@ export default function Login({ userType }: ILogin) {
                             type="submit"
                             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
                         >
-                            Войти
+                            Sign in
                         </button>
                     </div>
                 </form>
 
                 <p className="mt-10 text-center text-sm text-gray-500">
-                    Нет аккаунта?{" "}
+                    Don't have an account?{" "}
                     <a
                         href={pathname === '/admin-panel' ? '/admin-panel/register' : 'register'}
                         className="font-semibold text-indigo-600 hover:text-indigo-500"
                     >
-                        Регистрация
+                        Register
                     </a>
                 </p>
             </div>
         </div>
     );
+
 }

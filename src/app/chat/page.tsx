@@ -8,7 +8,6 @@ import { chatService } from "../services/chat.service";
 import { useEffect } from "react";
 import { axiosClassic } from "@/api/interceptors";
 
-
 export default function Chat() {
     const { data: chats, isLoading } = useAllChats();
     const router = useRouter();
@@ -17,7 +16,7 @@ export default function Chat() {
     const userIdNoAuth = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const currentUserId = userId ? userId : userIdNoAuth;
 
-    console.log(currentUserId, "user")
+    console.log(currentUserId, "user");
 
     useEffect(() => {
         const initChat = async () => {
@@ -26,7 +25,7 @@ export default function Chat() {
                     const findChat = chats.find(chat =>
                         chat.members.find(member => member === currentUserId)
                     );
-                    console.log(findChat, 'findChat')
+                    console.log(findChat, "findChat");
                     if (findChat) {
                         router.push(`chat/${findChat.chatId}`);
                     } else {
@@ -39,12 +38,12 @@ export default function Chat() {
                                 randomChatId,
                                 [
                                     {
-                                        title: "Ассистент",
-                                        text: "Привет! Я ваш психолог-ассистент. Чем могу помочь?",
+                                        title: "Assistant",
+                                        text: "Hello! I'm your psychological assistant. How can I help you today?",
                                         position: "left",
                                     },
                                 ],
-                                ["Ассистент", checkUserId]
+                                ["Assistant", checkUserId]
                             );
 
                             try {
@@ -59,9 +58,9 @@ export default function Chat() {
                                 console.error(error.response?.data?.message || "Registration failed");
                             }
 
-                            router.push(`/chat/${randomChatId}?initMessage=${encodeURIComponent("Привет! Я ваш психолог-ассистент. Чем могу помочь?")}`);
+                            router.push(`/chat/${randomChatId}?initMessage=${encodeURIComponent("Hello! I'm your psychological assistant. How can I help you today?")}`);
                         } catch (error) {
-                            console.error("Ошибка создания чата:", error);
+                            console.error("Error creating chat:", error);
                         }
                     }
                 }
@@ -70,7 +69,6 @@ export default function Chat() {
 
         initChat();
     }, [chats, currentUserId, isLoading, router]);
-
 
     return <div>Loading...</div>;
 }

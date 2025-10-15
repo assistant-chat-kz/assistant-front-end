@@ -14,11 +14,11 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
     const [endCons, setEndCons] = useState(false)
 
     const questionsArray = [
-        '1.Насколько вы довольны этой консультацией?',
-        '2.Как вы себя чувствуете после сессии по сравнению с тем, как чувствовали себя до неё?',
-        '3.Хотели бы вы продолжить работу с чат-ботом в будущем?',
-        '4.Насколько чат-бот был полезен в решении вашей проблемы?',
-        '5.Чувствуете ли вы эмоциональную поддержку после этой консультации?'
+        '1. How satisfied are you with this consultation?',
+        '2. How do you feel after the session compared to how you felt before it?',
+        '3. Would you like to continue working with the chatbot in the future?',
+        '4. How helpful was the chatbot in solving your problem?',
+        '5. Do you feel emotional support after this consultation?'
     ];
 
     const [answers, setAnswers] = useState<Record<string, number | null>>(
@@ -62,7 +62,7 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
             setEndCons(true);
         } catch (error: any) {
             console.error(
-                "Ошибка при создании консультации:",
+                "Error creating consultation:",
                 error.response?.data?.message || error.message
             );
         }
@@ -71,31 +71,37 @@ export default function SurveyComponent({ chatId, user, psyId }: ISurveyComponen
 
     return (
         <div>
-            {!endCons ? <><h2>Опрос</h2>
+            {!endCons ? (
+                <>
+                    <h2>Survey</h2>
 
-                {questionsArray.map((questionText, qIndex) => (
-                    <div key={qIndex}>
-                        <p>{questionText}</p>
-                        <ul style={{ display: 'flex', gap: '8px' }}>
-                            {Array.from({ length: 10 }, (_, index) => (
-                                <li key={index}>
-                                    <input
-                                        type="radio"
-                                        name={questionText}
-                                        checked={answers[questionText] === index + 1}
-                                        onChange={() => handleAnswerChange(questionText, index + 1)}
-                                    />
-                                    {index + 1}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))}
+                    {questionsArray.map((questionText, qIndex) => (
+                        <div key={qIndex}>
+                            <p>{questionText}</p>
+                            <ul style={{ display: 'flex', gap: '8px' }}>
+                                {Array.from({ length: 10 }, (_, index) => (
+                                    <li key={index}>
+                                        <input
+                                            type="radio"
+                                            name={questionText}
+                                            checked={answers[questionText] === index + 1}
+                                            onChange={() => handleAnswerChange(questionText, index + 1)}
+                                        />
+                                        {index + 1}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
 
-
-                {/* <pre>{JSON.stringify(answers, null, 2)}</pre> */}
-                <button onClick={() => sendSurvey()} className="ml-2 p-2 bg-blue-500 text-white rounded-lg">Отправить и закончить консультацию</button>
-            </> : <h2>Консультация окончена</h2>}
+                    {/* <pre>{JSON.stringify(answers, null, 2)}</pre> */}
+                    <button onClick={() => sendSurvey()} className="ml-2 p-2 bg-blue-500 text-white rounded-lg">
+                        Submit and finish consultation
+                    </button>
+                </>
+            ) : (
+                <h2>Consultation completed</h2>
+            )}
         </div>
     );
 }

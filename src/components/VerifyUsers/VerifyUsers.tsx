@@ -1,5 +1,4 @@
 import { useAllUsers } from "@/app/hooks/useAllUsers"
-
 import { userService } from "@/app/services/users.service"
 import { IUserResponce } from "@/types/users.types"
 import { useQueryClient } from "@tanstack/react-query"
@@ -15,12 +14,12 @@ export default function VerifyUsers() {
         try {
             if (!user.verify) {
                 const response = await userService.verifyUser(user.id)
-                alert("Пользователь подтвержден")
+                alert("User verified")
                 //@ts-ignore
                 queryClient.invalidateQueries(["user", user.id])
             }
         } catch {
-            throw new Error("Ошибка")
+            throw new Error("Error")
         }
     }
 
@@ -30,13 +29,13 @@ export default function VerifyUsers() {
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col" className="px-6 py-3">
-                            Имя
+                            Name
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Почта
+                            Email
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Верификация
+                            Verification
                         </th>
                     </tr>
                 </thead>
@@ -50,8 +49,11 @@ export default function VerifyUsers() {
                                 {user.email}
                             </td>
                             <td className="px-6 py-4">
-                                <button onClick={() => verifyUser(user)} className="mt-10 flex w-200 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600">
-                                    Подтвердить идентификацию
+                                <button
+                                    onClick={() => verifyUser(user)}
+                                    className="mt-10 flex w-200 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
+                                >
+                                    Confirm verification
                                 </button>
                             </td>
                         </tr>
@@ -59,6 +61,5 @@ export default function VerifyUsers() {
                 </tbody>
             </table>
         </div>
-
     )
 }

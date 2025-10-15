@@ -25,17 +25,17 @@ export default function AdminPanel() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
-            <h1 className="text-2xl font-bold mb-4">Авторизация</h1>
+            <h1 className="text-2xl font-bold mb-4">Authorization</h1>
             <input
                 type="text"
-                placeholder="Логин"
+                placeholder="Username"
                 className="border p-2 rounded mb-2"
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
             />
             <input
                 type="password"
-                placeholder="Пароль"
+                placeholder="Password"
                 className="border p-2 rounded mb-2"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -44,7 +44,7 @@ export default function AdminPanel() {
                 onClick={handleLogin}
                 className="bg-blue-500 text-white px-4 py-2 rounded"
             >
-                Войти
+                Sign In
             </button>
         </div>
     );

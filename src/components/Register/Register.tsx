@@ -50,16 +50,22 @@ export default function Register({ userType }: RegisterProps) {
 
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <Modal title={"Ошибка"}
-                content={"Некорректная почта"}
+            <Modal
+                title={"Error"}
+                content={"Invalid email"}
                 openModal={openModal}
                 setOpenModal={setOpenModal}
                 action={() => setOpenModal(false)}
                 button="accept"
             />
+
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                    {userType === 'admin' ? 'Регистрация админа' : userType === 'psychologist' ? 'Регистрация психолога' : 'Регистрация'}
+                    {userType === "admin"
+                        ? "Admin registration"
+                        : userType === "psychologist"
+                            ? "Psychologist registration"
+                            : "Registration"}
                 </h2>
             </div>
 
@@ -68,10 +74,10 @@ export default function Register({ userType }: RegisterProps) {
                     <div className="flex gap-10">
                         <div>
                             <label className="block text-sm/6 font-medium text-gray-900">
-                                Имя
+                                First name
                             </label>
                             <input
-                                {...register("name", { required: "Введите имя" })}
+                                {...register("name", { required: "Enter your first name" })}
                                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
                             />
                             {errors.name && (
@@ -79,12 +85,13 @@ export default function Register({ userType }: RegisterProps) {
                                 <p className="text-red-500 text-sm">{errors.name.message}</p>
                             )}
                         </div>
+
                         <div>
                             <label className="block text-sm/6 font-medium text-gray-900">
-                                Фамилия
+                                Last name
                             </label>
                             <input
-                                {...register("surname", { required: "Введите фамилию" })}
+                                {...register("surname", { required: "Enter your last name" })}
                                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
                             />
                             {errors.surname && (
@@ -96,14 +103,14 @@ export default function Register({ userType }: RegisterProps) {
 
                     <div>
                         <label className="block text-sm/6 font-medium text-gray-900">
-                            Адрес электронной почты
+                            Email address
                         </label>
                         <input
                             {...register("email", {
-                                required: "Введите email",
+                                required: "Enter your email",
                                 pattern: {
                                     value: /.+@.+\..+/,
-                                    message: "Некорректный email",
+                                    message: "Invalid email",
                                 },
                             })}
                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
@@ -116,14 +123,14 @@ export default function Register({ userType }: RegisterProps) {
 
                     <div>
                         <label className="block text-sm/6 font-medium text-gray-900">
-                            Пароль
+                            Password
                         </label>
                         <input
                             {...register("password", {
-                                required: "Введите пароль",
+                                required: "Enter your password",
                                 minLength: {
                                     value: 6,
-                                    message: "Минимум 6 символов",
+                                    message: "Minimum 6 characters",
                                 },
                             })}
                             type="password"
@@ -137,21 +144,19 @@ export default function Register({ userType }: RegisterProps) {
 
                     <div>
                         <label className="block text-sm/6 font-medium text-gray-900">
-                            Повторите пароль
+                            Confirm password
                         </label>
                         <input
                             {...register("confirmPassword", {
-                                required: "Повторите пароль",
+                                required: "Confirm your password",
                                 validate: (value) =>
-                                    value === watch("password") || "Пароли не совпадают",
+                                    value === watch("password") || "Passwords do not match",
                             })}
                             type="password"
                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
                         />
                         {errors.confirmPassword && (
-                            <p className="text-red-500 text-sm">
-                                Пароли не совпадают
-                            </p>
+                            <p className="text-red-500 text-sm">Passwords do not match</p>
                         )}
                     </div>
 
@@ -159,17 +164,21 @@ export default function Register({ userType }: RegisterProps) {
                         type="submit"
                         className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-500"
                     >
-                        Зарегистрироваться
+                        Register
                     </button>
                 </form>
 
                 <p className="mt-10 text-center text-sm/6 text-gray-500">
-                    Есть аккаунт?{" "}
-                    <a href="login" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                        Войти
+                    Already have an account?{" "}
+                    <a
+                        href="login"
+                        className="font-semibold text-indigo-600 hover:text-indigo-500"
+                    >
+                        Sign in
                     </a>
                 </p>
             </div>
         </div>
     );
+
 }
