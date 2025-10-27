@@ -1,10 +1,9 @@
 import axios, { type CreateAxiosDefaults } from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api'
 
 const options: CreateAxiosDefaults = {
-	// baseURL: 'http://localhost:4200/api',
-	baseURL: '/api',
-	// baseURL: "https://147.182.189.56:4200/api",
+	baseURL,
 	headers: {
 		'Content-Type': 'application/json'
 	},
