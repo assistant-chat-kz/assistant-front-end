@@ -182,17 +182,45 @@ export default function ChatComponent({
     };
 
     //@ts-ignore
-    const handleSubmit = async (e) => {
+
+
+    const openModalForExit = () => {
+        psy ? setOpenModal(true) : setOpenModalLogout(true);
+    };
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    async function fetchStreamResponse(prompt: string, onChunk: (text: string) => void) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/claude-ai/stream`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+        });
+
+        if (!response.body) throw new Error("No stream body");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        let done = false;
+        while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunkValue = decoder.decode(value);
+            onChunk(chunkValue);
+        }
+    }
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         if (!input.trim()) return;
 
         const messageToSend = { ...userMessage, text: input };
-
         setInput("");
+        setMessages((prev) => [...prev, messageToSend]);
 
         try {
-            let data;
-
             if (
                 chat?.members.length === 1 ||
                 (chat?.members.length !== 3 &&
@@ -211,6 +239,13 @@ export default function ChatComponent({
 
                 const prompt = `You are a professional psychologist assistant engaging in a warm, human, and deep conversation.  
 Your goal is to help a person understand themselves, their feelings, and find balance.
+
+**Conversation flow:**
+- Ask only **one thoughtful question at a time**, not multiple.
+- Wait for the user's reply before asking the next question.
+- Keep continuity: refer to what the user said before.
+- Never overload the user with too many questions or ideas in one message.
+- Keep the conversation natural and emotionally intelligent.
 
 **Style of communication:**
 - Write naturally, as in a real conversation. Don’t start with greetings like “Hi” or “Hello” — just continue the dialogue.
@@ -233,7 +268,7 @@ Short supportive intro (1–2 sentences).
 Short encouragement or supportive closing sentence.
 
 **Format:**
-- No prefixes like “Psychologist:” or “Answer:”.
+- No prefixes like “Psychologist:” or “Answer:” .
 - Only clean text or Markdown.
 - If the user asks for “short”, keep it concise but warm.
 
@@ -246,33 +281,44 @@ ${lastFiveMessages}
 
 **Psychologist:**`;
 
+
                 setLoading(true);
 
-                try {
-                    const res = await axiosClassic.post("claude-ai/generate", { prompt });
-                    data = await res.data;
+                let partialText = "";
 
-                    const botMessage: IMessage = {
-                        position: "left",
-                        title: "Assistant",
-                        text: data.text,
-                    };
+                await fetchStreamResponse(prompt, (chunk) => {
+                    partialText += chunk;
 
-                    setMessages((prev) => [...prev, messageToSend, botMessage]);
-
-                    await axiosClassic.put(`/chat/${chatId}`, {
-                        chatId: chatId,
-                        messages: [messageToSend, botMessage],
+                    setMessages((prev) => {
+                        const lastMsg = prev[prev.length - 1];
+                        if (lastMsg?.title === "Assistant") {
+                            const updated = [...prev];
+                            updated[updated.length - 1] = {
+                                ...lastMsg,
+                                text: partialText,
+                            };
+                            return updated;
+                        } else {
+                            return [
+                                ...prev,
+                                { position: "left", title: "Assistant", text: partialText },
+                            ];
+                        }
                     });
-                } catch (err) {
-                    console.log(err);
-                } finally {
-                    setLoading(false);
-                }
+                });
+
+                setLoading(false);
+
+                await axiosClassic.put(`/chat/${chatId}`, {
+                    chatId: chatId,
+                    messages: [
+                        messageToSend,
+                        { position: "left", title: "Assistant", text: partialText },
+                    ],
+                });
+
             } else {
                 socket?.emit("sendMessage", { chatId, message: messageToSend });
-                setMessages((prev) => [...prev, messageToSend]);
-
                 await axiosClassic.put(`/chat/${chatId}`, {
                     chatId: chatId,
                     messages: [messageToSend],
@@ -280,22 +326,15 @@ ${lastFiveMessages}
             }
         } catch (error) {
             console.error("Error fetching response:", error);
+            setLoading(false);
         }
     };
-
-    const openModalForExit = () => {
-        psy ? setOpenModal(true) : setOpenModalLogout(true);
-    };
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
 
     return (
         <div
             className={`flex flex-col h-[100dvh] mx-auto border overflow-hidden transition-colors ${theme === "light"
-                    ? "bg-gray-50 border-gray-300 text-gray-900"
-                    : "bg-gray-900 border-gray-700 text-gray-100"
+                ? "bg-gray-50 border-gray-300 text-gray-900"
+                : "bg-gray-900 border-gray-700 text-gray-100"
                 }`}
         >
             <Modal
@@ -317,8 +356,8 @@ ${lastFiveMessages}
             {/* Header */}
             <div
                 className={`flex items-center justify-between p-4 border-b ${theme === "light"
-                        ? "bg-white border-gray-200"
-                        : "bg-gray-800 border-gray-700"
+                    ? "bg-white border-gray-200"
+                    : "bg-gray-800 border-gray-700"
                     }`}
             >
                 <div className="flex items-center gap-3">
@@ -365,10 +404,10 @@ ${lastFiveMessages}
                     >
                         <div
                             className={`px-4 py-2 rounded-2xl max-w-[70%] ${msg.position === "right"
-                                    ? "bg-blue-500 text-white rounded-br-none"
-                                    : theme === "light"
-                                        ? "bg-gray-200 text-gray-900 rounded-bl-none"
-                                        : "bg-gray-700 text-gray-100 rounded-bl-none"
+                                ? "bg-blue-500 text-white rounded-br-none"
+                                : theme === "light"
+                                    ? "bg-gray-200 text-gray-900 rounded-bl-none"
+                                    : "bg-gray-700 text-gray-100 rounded-bl-none"
                                 }`}
                         >
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -385,8 +424,8 @@ ${lastFiveMessages}
             <form
                 onSubmit={handleSubmit}
                 className={`border-t p-3 flex items-center gap-2 ${theme === "light"
-                        ? "bg-white border-gray-200"
-                        : "bg-gray-800 border-gray-700"
+                    ? "bg-white border-gray-200"
+                    : "bg-gray-800 border-gray-700"
                     }`}
             >
                 <textarea
@@ -394,8 +433,8 @@ ${lastFiveMessages}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message..."
                     className={`flex-1 resize-none p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 ${theme === "light"
-                            ? "bg-white border-gray-300 text-gray-900"
-                            : "bg-gray-900 border-gray-700 text-gray-100"
+                        ? "bg-white border-gray-300 text-gray-900"
+                        : "bg-gray-900 border-gray-700 text-gray-100"
                         }`}
                     rows={1}
                     onKeyDown={(e) => {
@@ -409,8 +448,8 @@ ${lastFiveMessages}
                     type="submit"
                     disabled={!input.trim()}
                     className={`px-4 py-2 rounded-lg text-white ${input.trim()
-                            ? "bg-blue-500 hover:bg-blue-600"
-                            : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
+                        ? "bg-blue-500 hover:bg-blue-600"
+                        : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
                         }`}
                 >
                     ➤
