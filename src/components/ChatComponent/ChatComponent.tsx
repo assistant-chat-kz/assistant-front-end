@@ -20,6 +20,7 @@ import { LogOut } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Loading from "../Loading/Loading";
+import { emotionService } from "@/app/services/emotion.service";
 
 interface IMessage {
     position: "left" | "right";
@@ -193,10 +194,15 @@ export default function ChatComponent({
     }, [messages]);
 
     async function fetchStreamResponse(prompt: string, onChunk: (text: string) => void) {
+
+        const emotionResult = await emotionService.emotionPost(input)
+
+        const emotion = emotionResult.data.emotion
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/claude-ai/stream`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
+            body: JSON.stringify({ prompt, emotion }),
         });
 
         if (!response.body) throw new Error("No stream body");
@@ -211,6 +217,7 @@ export default function ChatComponent({
             const chunkValue = decoder.decode(value);
             onChunk(chunkValue);
         }
+
     }
     const handleSubmit = async (e: any) => {
         e.preventDefault();

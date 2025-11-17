@@ -16,16 +16,12 @@ export default function Chat() {
     const userIdNoAuth = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const currentUserId = userId ? userId : userIdNoAuth;
 
-    console.log(currentUserId, "user");
-
     useEffect(() => {
         const initChat = async () => {
             if (!isLoading) {
                 if (chats) {
                     const findChat = chats.find(chat =>
                         chat.members.find(member => member === currentUserId)
-                    );
-                    console.log(findChat, "findChat");
                     if (findChat) {
                         router.push(`chat/${findChat.chatId}`);
                     } else {
@@ -51,8 +47,6 @@ export default function Chat() {
                                     "/auth/createUserNoAuth",
                                     { id: randomChatId }
                                 );
-
-                                console.log(response.data, "response");
                                 alert("Registration successful");
                             } catch (error: any) {
                                 console.error(error.response?.data?.message || "Registration failed");
