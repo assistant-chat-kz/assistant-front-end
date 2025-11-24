@@ -234,9 +234,8 @@ export default function ChatComponent({
                     members.length !== 3 &&
                     chat?.members.includes("Assistant"))
             ) {
-                const lastFiveMessages =
+                const chatMessages =
                     chat?.messages
-                        ?.slice(-10)
                         .map((message: any) => {
                             const role =
                                 message.author === "Assistant" ? "Psychologist" : "User";
@@ -244,45 +243,57 @@ export default function ChatComponent({
                         })
                         .join("\n") || "";
 
-                const prompt = `You are a professional psychologist assistant engaging in a warm, human, and deep conversation.  
-Your goal is to help a person understand themselves, their feelings, and find balance.
+                console.log(chatMessages)
 
-**Conversation flow:**
-- Ask only **one thoughtful question at a time**, not multiple.
-- Wait for the user's reply before asking the next question.
-- Keep continuity: refer to what the user said before.
-- Never overload the user with too many questions or ideas in one message.
-- Keep the conversation natural and emotionally intelligent.
+                const prompt = `
+You are a professional psychologist assistant. Your main goal is to empathize with the user, understand their feelings, and help them find practical ways to solve their problems.
 
-**Style of communication:**
-- Write naturally, as in a real conversation. Don’t start with greetings like “Hi” or “Hello” — just continue the dialogue.
-- Tone — warm, empathetic, but not overly sweet.
-- Show emotional understanding (“It seems you’re feeling anxious...”), and explain why someone might feel that way.
-- Explain the meaning of your advice: why it matters and how it helps.
-- Avoid clichés and generic responses. Write sincerely.
-- Use emojis if they truly fit 😊
+Core rules:
 
-**If the user asks for a “plan” or “step-by-step explanation”, respond only in Markdown format:**
+Respond with warmth, empathy, and emotional understanding.
 
-## Short title (one sentence)
+Ask thoughtful, open-ended questions to understand the user’s situation.
+
+After understanding, suggest practical strategies, step-by-step actions, or alternative approaches.
+
+Do not overwhelm the user — keep suggestions focused and manageable.
+
+Refer to earlier messages to show continuity and understanding.
+
+Use emojis only when appropriate to convey warmth.
+
+Keep your language natural, supportive, and human-like.
+
+Conversation flow:
+
+Ask one clarifying question at a time.
+
+Once the situation becomes clear, offer actionable solutions.
+
+When the user requests a “plan”, “steps”, or “what to do”, respond in Markdown format:
 
 Short supportive intro (1–2 sentences).
 
-1. **Step 1 — Title.** Explanation (1–2 sentences).
-2. **Step 2 — ...**
-3. **Step 3 — ...**
+Step 1 — Title. Explanation (1–2 sentences).
+
+Step 2 — Title. Explanation (1–2 sentences).
+
+Step 3 — Title. Explanation (1–2 sentences).
+
+Your goals in every message:
+
+Understand the user
+
+Clarify gently
+
+Provide emotional support
+
+Offer practical progress
+
+Keep the dialogue flowing naturally
 
 Short encouragement or supportive closing sentence.
-
-**Format:**
-- No prefixes like “Psychologist:” or “Answer:” .
-- Only clean text or Markdown.
-- If the user asks for “short”, keep it concise but warm.
-
----
-
-**Last messages in chat:**
-${lastFiveMessages}
+${chatMessages}
 
 **User:** ${input}
 
@@ -336,6 +347,60 @@ ${lastFiveMessages}
             setLoading(false);
         }
     };
+
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+    const [isRecording, setIsRecording] = useState(false);
+
+    async function sendAudioToServer(audioBlob: Blob) {
+        const formData = new FormData();
+        formData.append("file", audioBlob, "voice.webm");
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/recognize`, {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await response.json();
+        const text = data.text;
+
+        console.log(text, 'user voice')
+
+        setInput(text);
+        await handleSubmit({ preventDefault() { } });
+    }
+
+
+    async function startRecording() {
+        if (isRecording) {
+            stopRecording();
+            return;
+        }
+
+        setIsRecording(true);
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+
+        mediaRecorderRef.current = recorder;
+        const chunks: Blob[] = [];
+
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+
+        recorder.onstop = async () => {
+            const audioBlob = new Blob(chunks, { type: "audio/webm" });
+            console.log(audioBlob, 'audio blob')
+            await sendAudioToServer(audioBlob);
+        };
+
+        recorder.start();
+    }
+
+    function stopRecording() {
+        setIsRecording(false);
+        mediaRecorderRef.current?.stop();
+    }
+
 
     return (
         <div
@@ -451,6 +516,13 @@ ${lastFiveMessages}
                         }
                     }}
                 />
+                {/* <button
+                    type="button"
+                    onClick={startRecording}
+                    className="px-3 py-2 rounded-lg bg-red-500 text-white"
+                >
+                    🎤
+                </button> */}
                 <button
                     type="submit"
                     disabled={!input.trim()}
@@ -461,6 +533,7 @@ ${lastFiveMessages}
                 >
                     ➤
                 </button>
+
             </form>
         </div>
     );

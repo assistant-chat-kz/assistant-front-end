@@ -21,7 +21,7 @@ export default function Chat() {
             if (!isLoading) {
                 if (chats) {
                     const findChat = chats.find(chat =>
-                        chat.members.find(member => member === currentUserId)
+                        chat.members.find(member => member === currentUserId))
                     if (findChat) {
                         router.push(`chat/${findChat.chatId}`);
                     } else {
