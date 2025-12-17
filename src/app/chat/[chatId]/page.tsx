@@ -36,8 +36,6 @@ export default function ChatPage() {
         }
     }, [isLoadinUser, user])
 
-    console.log(userId, 'useruser')
-
     return (
         <div>
             <SetNameModal openModal={openModal} setOpenModal={setOpenModal} userId={userId} />

@@ -13,16 +13,16 @@ export default function TableConsultations({ consultations }: ITableConsultation
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col" className="px-6 py-3">
-                            Id чата
+                            Chat ID
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Дата консультации
+                            Consultation Date
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Результаты консультации
+                            Consultation Results
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Психолог
+                            Psychologist
                         </th>
                     </tr>
                 </thead>

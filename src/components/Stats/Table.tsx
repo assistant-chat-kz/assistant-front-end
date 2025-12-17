@@ -48,11 +48,11 @@ export default function Table({ users, usersNoAuth, consultations }: ITable) {
                             const date = new Date(msg.createdAt);
                             const now = new Date();
                             const daysAgo = new Date();
-                            daysAgo.setDate(now.getDate() - 14); // <-- изменили на 14 дней
+                            daysAgo.setDate(now.getDate() - 14);
 
                             return date >= daysAgo && date <= now;
                         }).length
-                        : 0} сообщений
+                        : 0} messages
                 </td>
 
 

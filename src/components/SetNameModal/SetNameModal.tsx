@@ -36,7 +36,7 @@ export default function SetNameModal({ openModal, setOpenModal, userId }: IModal
                 </button>
 
                 <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">
-                    Введите своё имя
+                    Enter your name
                 </h2>
 
                 <div className="mb-6">
@@ -44,10 +44,10 @@ export default function SetNameModal({ openModal, setOpenModal, userId }: IModal
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Ваше имя..."
+                        placeholder="Your name..."
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 
-                     focus:ring-2 focus:ring-blue-500 focus:outline-none 
-                     bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+             focus:ring-2 focus:ring-blue-500 focus:outline-none 
+             bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
                     />
                 </div>
 
@@ -57,26 +57,27 @@ export default function SetNameModal({ openModal, setOpenModal, userId }: IModal
                             router.push('/login');
                         }}
                         className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 
-                     dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white 
-                     transition"
+             dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white 
+             transition"
                     >
-                        Отмена
+                        Cancel
                     </button>
                     <button
                         onClick={() => {
                             if (name.trim()) {
-                                updateNameForUser()
+                                updateNameForUser();
                                 handleCloseModal();
                             }
                         }}
                         className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 
-                     text-white shadow-md transition"
+             text-white shadow-md transition"
                     >
-                        Подтвердить
+                        Confirm
                     </button>
                 </div>
             </div>
         </div>
     ) : null;
+
 
 }
