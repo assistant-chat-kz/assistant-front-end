@@ -63,6 +63,9 @@ export default function ChatComponent({
     const searchParams = useSearchParams();
     const initMessage = searchParams?.get("initMessage");
 
+    const [isVoiceLoading, setIsVoiceLoading] = useState(false);
+
+
     const [theme, setTheme] = useState<"light" | "dark">("light");
 
     useEffect(() => {
@@ -219,13 +222,15 @@ export default function ChatComponent({
         }
 
     }
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+    const handleSubmit = async (text: string) => {
 
-        const messageToSend = { ...userMessage, text: input };
+        if (!text.trim()) return;
+
+        const messageToSend = { ...userMessage, text: text };
         setInput("");
         setMessages((prev) => [...prev, messageToSend]);
+
+        console.log('click')
 
         try {
             if (
@@ -295,7 +300,7 @@ Keep the dialogue flowing naturally
 Short encouragement or supportive closing sentence.
 ${chatMessages}
 
-**User:** ${input}
+**User:** ${text}
 
 **Psychologist:**`;
 
@@ -349,26 +354,36 @@ ${chatMessages}
     };
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
     const [isRecording, setIsRecording] = useState(false);
 
     async function sendAudioToServer(audioBlob: Blob) {
-        const formData = new FormData();
-        formData.append("file", audioBlob, "voice.webm");
+        try {
+            setIsVoiceLoading(true)
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/recognize`, {
-            method: "POST",
-            body: formData,
-        });
+            const formData = new FormData();
+            formData.append("file", audioBlob, "voice.webm");
 
-        const data = await response.json();
-        const text = data.text;
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/recognize`, {
+                method: "POST",
+                body: formData,
+            });
 
-        console.log(text, 'user voice')
+            const data = await response.json();
+            const text = data.text;
 
-        setInput(text);
-        await handleSubmit({ preventDefault() { } });
+            console.log(data, 'data')
+
+            if (!text || text.trim() === "") return;
+
+            await handleSubmit(text)
+        } catch (e) {
+            console.error("Voice recognition error", e);
+        } finally {
+            setIsVoiceLoading(false)
+        }
     }
+
+
 
 
     async function startRecording() {
@@ -389,9 +404,9 @@ ${chatMessages}
 
         recorder.onstop = async () => {
             const audioBlob = new Blob(chunks, { type: "audio/webm" });
-            console.log(audioBlob, 'audio blob')
             await sendAudioToServer(audioBlob);
         };
+
 
         recorder.start();
     }
@@ -494,7 +509,10 @@ ${chatMessages}
 
             {/* Input */}
             <form
-                onSubmit={handleSubmit}
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    handleSubmit(input)
+                }}
                 className={`border-t p-3 flex items-center gap-2 ${theme === "light"
                     ? "bg-white border-gray-200"
                     : "bg-gray-800 border-gray-700"
@@ -512,17 +530,21 @@ ${chatMessages}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
-                            handleSubmit(e);
+                            handleSubmit(input);
                         }
                     }}
                 />
-                {/* <button
+                <button
                     type="button"
                     onClick={startRecording}
-                    className="px-3 py-2 rounded-lg bg-red-500 text-white"
+                    disabled={isVoiceLoading}
+                    className={`px-3 py-2 rounded-lg text-white transition
+        ${isVoiceLoading ? "bg-gray-400 cursor-not-allowed" : "bg-red-500"}
+    `}
                 >
-                    🎤
-                </button> */}
+                    {isRecording ? "⏹" : "🎤"}
+                </button>
+
                 <button
                     type="submit"
                     disabled={!input.trim()}
