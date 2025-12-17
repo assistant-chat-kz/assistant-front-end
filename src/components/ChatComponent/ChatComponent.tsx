@@ -7,11 +7,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import "react-chat-elements/dist/main.css";
 import { axiosClassic } from "@/api/interceptors";
 import { useChat } from "@/app/hooks/useChat";
-import { useSocket } from '../../app/hooks/useSocket'
+import { useSocket } from "../../app/hooks/useSocket";
 import { useCallPsy } from "@/app/hooks/useCallPsy";
 import { useConsultation } from "@/app/hooks/useConsultation";
 import { usePsyInChat } from "@/app/hooks/usePsyInChat";
-import Modal from '@/components/Modal/Modal'
+import Modal from "@/components/Modal/Modal";
 import SurveyComponent from "../Survey/SurveyComponent";
 import { IUserResponce } from "@/types/users.types";
 import { IPsyResponce } from "@/types/psy.types";
@@ -20,6 +20,7 @@ import { LogOut } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Loading from "../Loading/Loading";
+import { emotionService } from "@/app/services/emotion.service";
 
 interface IMessage {
     position: "left" | "right";
@@ -27,31 +28,43 @@ interface IMessage {
     text: string;
 }
 
-export default function ChatComponent({ chatId, user, messagesInChat }: { chatId?: string; user?: IUserResponce; messagesInChat?: any[] }) {
+export default function ChatComponent({
+    chatId,
+    user,
+    messagesInChat,
+}: {
+    chatId?: string;
+    user?: IUserResponce;
+    messagesInChat?: any[];
+}) {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [input, setInput] = useState("");
-    const [members, setMembers] = useState<any>([])
-    const [openModal, setOpenModal] = useState(false)
-    const [openModalLogout, setOpenModalLogout] = useState(false)
+    const [members, setMembers] = useState<any>([]);
+    const [openModal, setOpenModal] = useState(false);
+    const [openModalLogout, setOpenModalLogout] = useState(false);
     const [showCallPsyButton, setShowCallPsyButton] = useState(false);
-    const [currentUser, setCurrentUser] = useState<IUserResponce | IPsyResponce>()
-    const [showSurvey, setShowSurvey] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [currentUser, setCurrentUser] = useState<IUserResponce | IPsyResponce>();
+    const [showSurvey, setShowSurvey] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-
-
-    const router = useRouter()
+    const router = useRouter();
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-    const userId = typeof window !== "undefined" ? localStorage.getItem("userId") ?? undefined : undefined;
+    const userId =
+        typeof window !== "undefined"
+            ? localStorage.getItem("userId") ?? undefined
+            : undefined;
 
-    const { data: psy } = usePsy(userId)
-    const { data: chat } = useChat(chatId)
-    const { data: consultation } = useConsultation(chatId, userId)
-    const { callPsychologist } = useCallPsy()
-    const { psyInChat } = usePsyInChat()
+    const { data: psy } = usePsy(userId);
+    const { data: chat } = useChat(chatId);
+    const { data: consultation } = useConsultation(chatId, userId);
+    const { callPsychologist } = useCallPsy();
+    const { psyInChat } = usePsyInChat();
     const searchParams = useSearchParams();
     const initMessage = searchParams?.get("initMessage");
+
+    const [isVoiceLoading, setIsVoiceLoading] = useState(false);
+
 
     const [theme, setTheme] = useState<"light" | "dark">("light");
 
@@ -76,7 +89,7 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                 await userService.visitUser(userId);
             }
         } catch (e) {
-            console.error("Ошибка", e);
+            console.error("Error visiting user:", e);
         }
     };
 
@@ -84,7 +97,7 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
         visitUser();
     }, [userId]);
 
-    const noAuthUserName = user?.name ? user.name : 'Вы'
+    const noAuthUserName = user?.name ? user.name : "You";
 
     const userMessage: IMessage = {
         position: psy ? "left" : "right",
@@ -93,14 +106,14 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
     };
 
     //@ts-ignore
-    const socket = useSocket(userId)
+    const socket = useSocket(userId);
 
     useEffect(() => {
-        setCurrentUser(user ? user : psy)
+        setCurrentUser(user ? user : psy);
         updateMessagesInChat();
 
         if (psy && chatId) {
-            callPsychologist(chatId, false)
+            callPsychologist(chatId, false);
         }
     }, [messagesInChat, psy, chatId, socket]);
 
@@ -110,17 +123,16 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
         socket.emit("joinChat", chatId);
 
         socket.on("newMessage", (newMessage: IMessage) => {
-
             const reverseMessage =
-                currentUser?.name !== newMessage.title && noAuthUserName !== 'Вы'
-                    ? { ...newMessage, position: 'left' }
-                    : { ...newMessage, position: 'right' }
+                currentUser?.name !== newMessage.title && noAuthUserName !== "You"
+                    ? { ...newMessage, position: "left" }
+                    : { ...newMessage, position: "right" };
             //@ts-ignore
             setMessages((prev) => [...prev, reverseMessage]);
         });
 
         socket.on("userJoined", ({ members: newMembers }) => {
-            if (psy) psyInChat(chatId, psy.id)
+            if (psy) psyInChat(chatId, psy.id);
 
             setMembers((prev: any) => {
                 const isDifferent = JSON.stringify(prev) !== JSON.stringify(newMembers);
@@ -149,36 +161,51 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
 
     const updateMessagesInChat = () => {
         if (messagesInChat) {
-            setMessages(messagesInChat)
-
+            setMessages(messagesInChat);
 
             if (psy && messagesInChat.length > 0) {
-                setMessages(messages =>
-                    messages.map(msg => ({
+                setMessages((messages) =>
+                    messages.map((msg) => ({
                         ...msg,
-                        position: msg.position === 'left' ? 'right' : 'left'
+                        position: msg.position === "left" ? "right" : "left",
                     }))
                 );
             }
         }
-    }
+    };
 
     const handleLeaveChat = () => {
         socket?.emit("leaveChat", chatId);
-        router.push('/chatsList')
+        router.push("/chatsList");
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('userId')
-        router.push('/login')
-    }
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("userId");
+        router.push("/login");
+    };
+
+    //@ts-ignore
+
+
+    const openModalForExit = () => {
+        psy ? setOpenModal(true) : setOpenModalLogout(true);
+    };
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     async function fetchStreamResponse(prompt: string, onChunk: (text: string) => void) {
+
+        const emotionResult = await emotionService.emotionPost(input)
+
+        const emotion = emotionResult.data.emotion
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/claude-ai/stream`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
+            body: JSON.stringify({ prompt, emotion }),
         });
 
         if (!response.body) throw new Error("No stream body");
@@ -193,16 +220,17 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
             const chunkValue = decoder.decode(value);
             onChunk(chunkValue);
         }
+
     }
+    const handleSubmit = async (text: string) => {
 
-    //@ts-ignore
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+        if (!text.trim()) return;
 
-        const messageToSend = { ...userMessage, text: input };
+        const messageToSend = { ...userMessage, text: text };
         setInput("");
         setMessages((prev) => [...prev, messageToSend]);
+
+        console.log('click')
 
         try {
             if (
@@ -211,9 +239,8 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                     members.length !== 3 &&
                     chat?.members.includes("Assistant"))
             ) {
-                const lastFiveMessages =
+                const chatMessages =
                     chat?.messages
-                        ?.slice(-10)
                         .map((message: any) => {
                             const role =
                                 message.author === "Assistant" ? "Psychologist" : "User";
@@ -221,24 +248,61 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                         })
                         .join("\n") || "";
 
-                const prompt = `Ты — профессиональный психолог-ассистент, 
-                ведущий доверительный, человечный и глубокий разговор. 
-                Твоя цель — помочь человеку понять себя, свои чувства и найти пути к внутреннему равновесию. 
-                **Стиль общения:** - Пиши естественно, как в живом диалоге. Не начинай с приветствий вроде "Привет" 
-                или "Здравствуйте" — просто продолжай разговор. - Тон — тёплый, эмпатичный, но без излишнего сюсюканья. - 
-                Показывай эмоциональное понимание: отражай чувства собеседника ("Похоже, тебе сейчас тревожно..."), 
-                объясняй, почему человек может так себя чувствовать. - Объясняй смысл своих советов: зачем это нужно, как это 
-                может помочь. - Избегай шаблонных фраз и клише. Отвечай с искренним участием. - Используй эмодзи, если они 
-                действительно уместны, чтобы добавить тепла и человечности 😊 **Если пользователь просит "план" или "пошаговое 
-                объяснение", отвечай только в Markdown:** ## Краткий заголовок (одно предложение) Короткое, 
-                поддерживающее вступление (1–2 предложения). 
-                1. **Шаг 1 — Короткое название.** Объяснение (1–2 предложения). 
-                2. **Шаг 2 — ...** 3. **Шаг 3 — ...** Короткая поддержка или призыв к действию (1 предложение). 
-                **Формат вывода:** - Никаких префиксов вроде "Психолог:", "Ответ:", и т.п. - Только чистый текст или Markdown. - 
-                Если человек просит "коротко" — делай ответ лаконичным, но всё равно с теплотой. --- 
-                **Последние сообщения чата:** ${lastFiveMessages} 
-                **Пользователь:** ${input} 
-                **Психолог:**`
+                console.log(chatMessages)
+
+                const prompt = `
+You are a professional psychologist assistant. Your main goal is to empathize with the user, understand their feelings, and help them find practical ways to solve their problems.
+
+Core rules:
+
+Respond with warmth, empathy, and emotional understanding.
+
+Ask thoughtful, open-ended questions to understand the user’s situation.
+
+After understanding, suggest practical strategies, step-by-step actions, or alternative approaches.
+
+Do not overwhelm the user — keep suggestions focused and manageable.
+
+Refer to earlier messages to show continuity and understanding.
+
+Use emojis only when appropriate to convey warmth.
+
+Keep your language natural, supportive, and human-like.
+
+Conversation flow:
+
+Ask one clarifying question at a time.
+
+Once the situation becomes clear, offer actionable solutions.
+
+When the user requests a “plan”, “steps”, or “what to do”, respond in Markdown format:
+
+Short supportive intro (1–2 sentences).
+
+Step 1 — Title. Explanation (1–2 sentences).
+
+Step 2 — Title. Explanation (1–2 sentences).
+
+Step 3 — Title. Explanation (1–2 sentences).
+
+Your goals in every message:
+
+Understand the user
+
+Clarify gently
+
+Provide emotional support
+
+Offer practical progress
+
+Keep the dialogue flowing naturally
+
+Short encouragement or supportive closing sentence.
+${chatMessages}
+
+**User:** ${text}
+
+**Psychologist:**`;
 
 
                 setLoading(true);
@@ -289,39 +353,98 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
         }
     };
 
-    const handleOpenModal = () => {
-        setOpenModal(true)
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const [isRecording, setIsRecording] = useState(false);
+
+    async function sendAudioToServer(audioBlob: Blob) {
+        try {
+            setIsVoiceLoading(true)
+
+            const formData = new FormData();
+            formData.append("file", audioBlob, "voice.webm");
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/recognize`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            const text = data.text;
+
+            console.log(data, 'data')
+
+            if (!text || text.trim() === "") return;
+
+            await handleSubmit(text)
+        } catch (e) {
+            console.error("Voice recognition error", e);
+        } finally {
+            setIsVoiceLoading(false)
+        }
     }
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
 
-    const openModalForExit = () => {
-        psy ? setOpenModal(true) : setOpenModalLogout(true)
+
+
+    async function startRecording() {
+        if (isRecording) {
+            stopRecording();
+            return;
+        }
+
+        setIsRecording(true);
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+
+        mediaRecorderRef.current = recorder;
+        const chunks: Blob[] = [];
+
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+
+        recorder.onstop = async () => {
+            const audioBlob = new Blob(chunks, { type: "audio/webm" });
+            await sendAudioToServer(audioBlob);
+        };
+
+
+        recorder.start();
     }
+
+    function stopRecording() {
+        setIsRecording(false);
+        mediaRecorderRef.current?.stop();
+    }
+
 
     return (
-
         <div
             className={`flex flex-col h-[100dvh] mx-auto border overflow-hidden transition-colors ${theme === "light"
                 ? "bg-gray-50 border-gray-300 text-gray-900"
                 : "bg-gray-900 border-gray-700 text-gray-100"
                 }`}
         >
-            <Modal title={"Подтвердите"}
-                content={"Вы уверены что хотите выйти из чата?"}
-                openModal={openModal} setOpenModal={setOpenModal}
-                action={handleLeaveChat} />
+            <Modal
+                title={"Confirm"}
+                content={"Are you sure you want to leave the chat?"}
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+                action={handleLeaveChat}
+            />
 
-            <Modal title={"Подтвердите"}
-                content={"Вы уверены что хотите выйти из аккаунта?"}
+            <Modal
+                title={"Confirm"}
+                content={"Are you sure you want to log out?"}
                 openModal={openModalLogout}
                 setOpenModal={setOpenModalLogout}
-                action={handleLogout} />
+                action={handleLogout}
+            />
+
             {/* Header */}
             <div
-                className={`flex items-center justify-between p-4 border-b ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"
+                className={`flex items-center justify-between p-4 border-b ${theme === "light"
+                    ? "bg-white border-gray-200"
+                    : "bg-gray-800 border-gray-700"
                     }`}
             >
                 <div className="flex items-center gap-3">
@@ -332,15 +455,17 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
                     </div>
                     <div>
-                        <h1 className="font-semibold text-lg">{psy ? psy.name : "Ассистент"}</h1>
+                        <h1 className="font-semibold text-lg">
+                            {psy ? psy.name : "Assistant"}
+                        </h1>
                         <p className="text-sm opacity-70">
-                            {psy ? "В сети • Психолог" : "В сети • Ассистент"}
+                            {psy ? "Online • Psychologist" : "Online • Assistant"}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex gap-[30px]">
-                    {/* Кнопка смены темы */}
+                    {/* Theme toggle button */}
                     <button
                         type="button"
                         onClick={toggleTheme}
@@ -349,25 +474,21 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                         {theme === "light" ? "🌙" : "☀️"}
                     </button>
 
-                    {/* Кнопка выхода из аккаунта или чата */}
+                    {/* Logout/leave button */}
                     <button onClick={() => openModalForExit()}>
                         <LogOut className="w-5 h-5" />
                     </button>
                 </div>
             </div>
 
-
             {/* Messages */}
             <div className="flex-1 overflow-auto p-4">
                 {messages.map((msg, index) => (
-
                     <div
                         key={index}
                         className={`flex mb-3 ${msg.position === "right" ? "justify-end" : "justify-start"
                             }`}
                     >
-
-
                         <div
                             className={`px-4 py-2 rounded-2xl max-w-[70%] ${msg.position === "right"
                                 ? "bg-blue-500 text-white rounded-br-none"
@@ -376,7 +497,9 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                                     : "bg-gray-700 text-gray-100 rounded-bl-none"
                                 }`}
                         >
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {msg.text}
+                            </ReactMarkdown>
                         </div>
                     </div>
                 ))}
@@ -386,14 +509,19 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
 
             {/* Input */}
             <form
-                onSubmit={handleSubmit}
-                className={`border-t p-3 flex items-center gap-2 ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-700"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    handleSubmit(input)
+                }}
+                className={`border-t p-3 flex items-center gap-2 ${theme === "light"
+                    ? "bg-white border-gray-200"
+                    : "bg-gray-800 border-gray-700"
                     }`}
             >
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Напишите сообщение..."
+                    placeholder="Type a message..."
                     className={`flex-1 resize-none p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 ${theme === "light"
                         ? "bg-white border-gray-300 text-gray-900"
                         : "bg-gray-900 border-gray-700 text-gray-100"
@@ -402,10 +530,21 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
-                            handleSubmit(e);
+                            handleSubmit(input);
                         }
                     }}
                 />
+                <button
+                    type="button"
+                    onClick={startRecording}
+                    disabled={isVoiceLoading}
+                    className={`px-3 py-2 rounded-lg text-white transition
+        ${isVoiceLoading ? "bg-gray-400 cursor-not-allowed" : "bg-red-500"}
+    `}
+                >
+                    {isRecording ? "⏹" : "🎤"}
+                </button>
+
                 <button
                     type="submit"
                     disabled={!input.trim()}
@@ -416,8 +555,8 @@ export default function ChatComponent({ chatId, user, messagesInChat }: { chatId
                 >
                     ➤
                 </button>
+
             </form>
         </div>
     );
-
 }
