@@ -23,6 +23,8 @@ import Loading from "../Loading/Loading";
 import { emotionService } from "@/app/services/emotion.service";
 
 interface IMessage {
+    id: number;
+    chatId: string;
     position: "left" | "right";
     title: string;
     text: string;
@@ -192,6 +194,8 @@ export default function ChatComponent({
         psy ? setOpenModal(true) : setOpenModalLogout(true);
     };
 
+    console.log(messages, 'mess')
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -251,58 +255,51 @@ export default function ChatComponent({
                 console.log(chatMessages)
 
                 const prompt = `
-You are a professional psychologist assistant. Your main goal is to empathize with the user, understand their feelings, and help them find practical ways to solve their problems.
+Вы — профессиональный помощник психолога.
 
-Core rules:
+Ваша задача — помочь пользователю практическими и реалистичными советами.
 
-Respond with warmth, empathy, and emotional understanding.
+ВАЖНОЕ ПРАВИЛО ПЕРЕКЛЮЧЕНИЯ:
 
-Ask thoughtful, open-ended questions to understand the user’s situation.
+— Если пользователь явно просит советы, план, шаги или говорит:
+  «дай советы», «что делать», «без вопросов», «просто советы» —
+  ВЫ ОБЯЗАНЫ:
+  • НЕ задавать вопросы
+  • НЕ уточнять ситуацию
+  • СРАЗУ перейти к рекомендациям
 
-After understanding, suggest practical strategies, step-by-step actions, or alternative approaches.
+— Если пользователь не против вопросов, можно задать ОДИН уточняющий вопрос.
 
-Do not overwhelm the user — keep suggestions focused and manageable.
+ОГРАНИЧЕНИЯ:
+• Никогда не задавайте один и тот же вопрос повторно
+• Не задавайте вопросы, если пользователь уже выразил усталость от них
+• Максимум 1 вопрос за сообщение
 
-Refer to earlier messages to show continuity and understanding.
+Формат советов (если пользователь их просит):
 
-Use emojis only when appropriate to convey warmth.
+Короткая поддержка (1 предложение).
 
-Keep your language natural, supportive, and human-like.
+Шаг 1 — Заголовок  
+Краткое объяснение (1–2 предложения).
 
-Conversation flow:
+Шаг 2 — Заголовок  
+Краткое объяснение (1–2 предложения).
 
-Ask one clarifying question at a time.
+Шаг 3 — Заголовок  
+Краткое объяснение (1–2 предложения).
 
-Once the situation becomes clear, offer actionable solutions.
+Тон:
+Тёплый, спокойный, практичный, без воды.
 
-When the user requests a “plan”, “steps”, or “what to do”, respond in Markdown format:
-
-Short supportive intro (1–2 sentences).
-
-Step 1 — Title. Explanation (1–2 sentences).
-
-Step 2 — Title. Explanation (1–2 sentences).
-
-Step 3 — Title. Explanation (1–2 sentences).
-
-Your goals in every message:
-
-Understand the user
-
-Clarify gently
-
-Provide emotional support
-
-Offer practical progress
-
-Keep the dialogue flowing naturally
-
-Short encouragement or supportive closing sentence.
+Контекст диалога:
 ${chatMessages}
 
-**User:** ${text}
+Сообщение пользователя:
+${text}
 
-**Psychologist:**`;
+Ответ психолога:
+`;
+
 
 
                 setLoading(true);
@@ -416,6 +413,8 @@ ${chatMessages}
         mediaRecorderRef.current?.stop();
     }
 
+    const sortMessages = messages.sort((a, b) => a.id - b.id)
+
 
     return (
         <div
@@ -425,16 +424,16 @@ ${chatMessages}
                 }`}
         >
             <Modal
-                title={"Confirm"}
-                content={"Are you sure you want to leave the chat?"}
+                title={"Подвердить"}
+                content={"Вы уверены, что хотите покинуть чат?"}
                 openModal={openModal}
                 setOpenModal={setOpenModal}
                 action={handleLeaveChat}
             />
 
             <Modal
-                title={"Confirm"}
-                content={"Are you sure you want to log out?"}
+                title={"Подвердить"}
+                content={"Вы уверены, что хотите выйти из аккаунта?"}
                 openModal={openModalLogout}
                 setOpenModal={setOpenModalLogout}
                 action={handleLogout}
@@ -456,10 +455,10 @@ ${chatMessages}
                     </div>
                     <div>
                         <h1 className="font-semibold text-lg">
-                            {psy ? psy.name : "Assistant"}
+                            {psy ? psy.name : "Ассистент"}
                         </h1>
                         <p className="text-sm opacity-70">
-                            {psy ? "Online • Psychologist" : "Online • Assistant"}
+                            {psy ? "Online • Psychologist" : "Онлайн • Ассистент"}
                         </p>
                     </div>
                 </div>
@@ -483,7 +482,7 @@ ${chatMessages}
 
             {/* Messages */}
             <div className="flex-1 overflow-auto p-4">
-                {messages.map((msg, index) => (
+                {sortMessages.map((msg, index) => (
                     <div
                         key={index}
                         className={`flex mb-3 ${msg.position === "right" ? "justify-end" : "justify-start"
