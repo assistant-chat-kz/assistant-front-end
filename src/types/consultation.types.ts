@@ -8,10 +8,12 @@ export interface IQuestionResponce {
 }
 
 export interface IConsultationResponce {
+    id: string;
     chatId: string;
+    sessionStartedAt?: string | null;
     createdAt: string;
-    userId: string,
-    psyId: string,
+    userId: string | null,
+    psyId: string | null,
     questions: IQuestionResponce[]
-    userNoAuthId: string
+    userNoAuthId: string | null
 }

@@ -1,83 +1,41 @@
 import { userService } from "@/app/services/users.service";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react";
+import { HeartHandshake, X } from "lucide-react";
 
-interface IModalChoice {
-    openModal: boolean
-    setOpenModal: Dispatch<SetStateAction<boolean>>
-    userId: string | undefined
-}
-
-export default function SetNameModal({ openModal, setOpenModal, userId }: IModalChoice) {
-
-    const [name, setName] = useState('')
-
+export default function SetNameModal({
+    openModal,
+    setOpenModal,
+    userId,
+}: {
+    openModal: boolean;
+    setOpenModal: Dispatch<SetStateAction<boolean>>;
+    userId?: string;
+}) {
+    const [name, setName] = useState("");
     const router = useRouter();
 
-    const handleCloseModal = () => {
-        setOpenModal(!openModal)
-    }
+    if (!openModal) return null;
 
-    const updateNameForUser = async () => {
-        //@ts-ignore
-        await userService.updateUser(userId, { name })
-    }
+    const saveName = async () => {
+        if (!userId || !name.trim()) return;
+        await userService.updateUser(userId, { name: name.trim() });
+        setOpenModal(false);
+    };
 
-    return openModal ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all duration-300 scale-100">
-                <button
-                    onClick={() => {
-                        router.push('/login');
-                    }}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
-                >
-                    &times;
-                </button>
-
-                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">
-                    Enter your name
-                </h2>
-
-                <div className="mb-6">
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your name..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 
-             focus:ring-2 focus:ring-blue-500 focus:outline-none 
-             bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
-                    />
-                </div>
-
-                <div className="flex justify-end space-x-4">
-                    <button
-                        onClick={() => {
-                            router.push('/login');
-                        }}
-                        className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 
-             dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white 
-             transition"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (name.trim()) {
-                                updateNameForUser();
-                                handleCloseModal();
-                            }
-                        }}
-                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 
-             text-white shadow-md transition"
-                    >
-                        Confirm
-                    </button>
+    return (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="name-title">
+            <div className="relative w-full max-w-md rounded-[1.5rem] bg-white p-6 shadow-2xl sm:p-8">
+                <button onClick={() => router.push("/login")} className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100" aria-label="Закрыть"><X className="h-4 w-4" /></button>
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-teal-50 text-teal-700"><HeartHandshake className="h-5 w-5" /></span>
+                <h2 id="name-title" className="mt-5 text-2xl font-semibold text-slate-900">Как к вам обращаться?</h2>
+                <p className="mt-2 leading-6 text-slate-500">Имя поможет сделать разговор немного теплее.</p>
+                <input value={name} onChange={(event) => setName(event.target.value)} onKeyDown={(event) => event.key === "Enter" && saveName()} placeholder="Ваше имя" autoFocus className="field-control mt-6" />
+                <div className="mt-6 flex gap-2">
+                    <button onClick={() => router.push("/login")} className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Войти</button>
+                    <button onClick={saveName} disabled={!name.trim()} className="primary-button flex-1 px-4 py-2.5 text-sm disabled:opacity-50">Продолжить</button>
                 </div>
             </div>
         </div>
-    ) : null;
-
-
+    );
 }

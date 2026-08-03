@@ -1,13 +1,13 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import ChatComponent from "@/components/ChatComponent/ChatComponent";
 import { useChat } from "@/app/hooks/useChat";
 import { getUserId } from "@/app/hooks/getUserId";
-import Modal from "@/components/Modal/Modal";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SetNameModal from "@/components/SetNameModal/SetNameModal";
 import { useUser } from "@/app/hooks/useUser";
+import { usePsy } from "@/app/hooks/usePsy";
 
 
 export default function ChatPage() {
@@ -17,24 +17,21 @@ export default function ChatPage() {
     const { chatId } = params
 
     const userId = getUserId()
-    const userIdNoAuth = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const [openModal, setOpenModal] = useState(false)
 
-    const { data: user, isLoading: isLoadinUser } = useUser(userId)
+    const { data: user, isLoading: isLoadingUser } = useUser(userId)
+    const { data: psychologist, isLoading: isLoadingPsychologist } = usePsy(userId)
     const { data: chat, isLoading } = useChat(chatId)
 
     const messagesInChat = chat?.messages
 
     useEffect(() => {
-        if (!isLoadinUser) {
+        if (isLoadingUser || isLoadingPsychologist) return;
 
-            if (user?.name) {
-                setOpenModal(false)
-            } else {
-                setOpenModal(true)
-            }
-        }
-    }, [isLoadinUser, user])
+        // A psychologist already has a name in their own profile. The name
+        // modal is only for anonymous users whose profile is stored in UserNoAuth.
+        setOpenModal(!psychologist && !user?.name);
+    }, [isLoadingUser, isLoadingPsychologist, psychologist, user?.name])
 
     return (
         <div>

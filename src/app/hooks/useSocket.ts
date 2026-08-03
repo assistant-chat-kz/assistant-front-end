@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "https://aikouch.kz";
+const SOCKET_SERVER_URL =
+    process.env.NEXT_PUBLIC_SOCKET_URL ||
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") ||
+    "https://aikouch.kz";
 
-export const useSocket = (userId: string) => {
+export const useSocket = (userId?: string) => {
     const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
+        if (!userId) return;
+
         const newSocket: Socket = io(SOCKET_SERVER_URL, {
             transports: ["websocket"],
             query: { userId },

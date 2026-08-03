@@ -1,157 +1,178 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form";
-import { axiosClassic } from "@/api/interceptors";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
-
-import { jwtDecode } from "jwt-decode";
-import Modal from "../Modal/Modal";
-import AssistantChoice from "../AssistantChoice/AssistantChoice";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { jwtDecode } from "jwt-decode";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Eye, EyeOff, LoaderCircle, Mail } from "lucide-react";
+import { axiosClassic } from "@/api/interceptors";
+import { AudienceSource } from "@/types/users.types";
+import AssistantChoice from "../AssistantChoice/AssistantChoice";
+import AuthShell from "../AuthShell/AuthShell";
 
-interface ILogin {
-    userType: string
+type LoginUserType = "user" | "admin" | "psychologist";
+
+interface LoginProps {
+    userType: LoginUserType;
 }
 
-export default function Login({ userType }: ILogin) {
-    const { register, handleSubmit } = useForm();
+interface LoginForm {
+    email: string;
+    password: string;
+}
 
-    const [openModal, setOpenModal] = useState(false)
+interface TokenPayload {
+    userId: string;
+    userType?: string;
+    source?: AudienceSource;
+}
 
+export default function Login({ userType }: LoginProps) {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginForm>();
+    const [openModal, setOpenModal] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
 
-    const pathname = usePathname()
-
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const theme = localStorage.getItem("theme");
-            if (theme === "dark") {
-                localStorage.setItem("theme", "light");
-                document.body.classList.remove("dark");
-                document.body.classList.add("light");
-            }
-        }
+        localStorage.setItem("theme", "light");
+        document.body.classList.remove("dark");
     }, []);
 
+    const loginAt = async (endpoint: string, data: LoginForm) =>
+        axiosClassic.post(endpoint, data);
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: LoginForm) => {
+        setIsSubmitting(true);
+        setErrorMessage("");
+
         try {
             let response;
-            let userTypeData;
+            let resolvedType: LoginUserType = userType;
 
-            try {
-                response = await (userType === "admin"
-                    ? axiosClassic.post("/auth/loginAdmin", data)
-                    : axiosClassic.post("/auth/login", data));
-            } catch (error: any) {
-                console.error("Ошибка при входе, пробуем /auth/loginPsychologist", error.response?.data?.message);
-
-                response = await axiosClassic.post("/auth/loginPsychologist", data);
-
-                userTypeData = 'psychologist'
+            if (userType === "admin") {
+                response = await loginAt("/auth/loginAdmin", data);
+            } else if (userType === "psychologist") {
+                response = await loginAt("/auth/loginPsychologist", data);
+            } else {
+                try {
+                    response = await loginAt("/auth/login", data);
+                } catch {
+                    response = await loginAt("/auth/loginPsychologist", data);
+                    resolvedType = "psychologist";
+                }
             }
 
             const token = response.data.accessToken;
-            if (!token) throw new Error("Нет accessToken в ответе сервера");
+            if (!token) throw new Error("Сервер не вернул токен доступа");
 
+            const decoded = jwtDecode<TokenPayload>(token);
+            const source = response.data.source || decoded.source || "OTHER";
             localStorage.setItem("accessToken", token);
-            const decoded: any = jwtDecode(token);
             localStorage.setItem("userId", decoded.userId);
+            localStorage.setItem("userSource", source);
 
-            alert("Login successful");
-
-            if (userType === "admin") {
-                router.push('cabinet')
-            } else if (userTypeData === "psychologist") {
+            if (resolvedType === "admin" || resolvedType === "psychologist") {
                 router.push("/cabinet");
-            } else {
-                setOpenModal(true)
+                return;
             }
-        } catch (error: any) {
-            console.error(error.response?.data?.message || "Login failed");
-            alert(error.response?.data?.message || "Ошибка входа");
-        }
 
+            sessionStorage.setItem("showSourceBanner", "true");
+            setOpenModal(true);
+        } catch (error: any) {
+            setErrorMessage(
+                error.response?.data?.message === "Invalid credentials"
+                    ? "Неверная почта или пароль"
+                    : error.response?.data?.message || "Не удалось войти. Попробуйте ещё раз.",
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
+    const title =
+        userType === "admin"
+            ? "Вход для администратора"
+            : userType === "psychologist"
+                ? "Вход для психолога"
+                : "Войдите в свой аккаунт";
+
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <AssistantChoice
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-            />
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-                    {userType === "admin"
-                        ? "Sign in as admin"
-                        : userType === "psychologist"
-                            ? "Sign in as psychologist"
-                            : "Sign in"}
-                </h2>
-            </div>
+        <AuthShell title={title} description="Продолжите диалог или начните новую беседу в спокойном темпе.">
+            <AssistantChoice openModal={openModal} setOpenModal={setOpenModal} />
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium text-gray-900"
-                        >
-                            Email address
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                {...register("email")}
-                                id="email"
-                                type="email"
-                                required
-                                autoComplete="email"
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-indigo-600 sm:text-sm"
-                            />
-                        </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+                <div>
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
+                        Электронная почта
+                    </label>
+                    <div className="relative">
+                        {/* <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /> */}
+                        <input
+                            {...register("email", {
+                                required: "Укажите почту",
+                                pattern: { value: /.+@.+\..+/, message: "Проверьте адрес почты" },
+                            })}
+                            id="email"
+                            type="email"
+                            autoComplete="email"
+                            placeholder="name@example.kz"
+                            className="field-control pl-10"
+                        />
                     </div>
+                    {errors.email && <p className="mt-2 text-sm text-rose-600">{errors.email.message}</p>}
+                </div>
 
-                    <div>
-                        <label
-                            htmlFor="password"
-                            className="block text-sm font-medium text-gray-900"
-                        >
-                            Password
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                {...register("password")}
-                                id="password"
-                                type="password"
-                                required
-                                autoComplete="current-password"
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-indigo-600 sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
+                <div>
+                    <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-700">
+                        Пароль
+                    </label>
+                    <div className="relative">
+                        <input
+                            {...register("password", { required: "Введите пароль" })}
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            placeholder="Ваш пароль"
+                            className="field-control pr-11"
+                        />
                         <button
-                            type="submit"
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
+                            type="button"
+                            onClick={() => setShowPassword((value) => !value)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                            aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
                         >
-                            Sign in
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                     </div>
-                </form>
+                    {errors.password && <p className="mt-2 text-sm text-rose-600">{errors.password.message}</p>}
+                </div>
 
-                <p className="mt-10 text-center text-sm text-gray-500">
-                    Don't have an account?{" "}
-                    <a
-                        href={pathname === '/admin-panel' ? '/admin-panel/register' : 'register'}
-                        className="font-semibold text-indigo-600 hover:text-indigo-500"
-                    >
-                        Register
-                    </a>
+                {errorMessage && (
+                    <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {errorMessage}
+                    </div>
+                )}
+
+                <button type="submit" disabled={isSubmitting} className="primary-button h-12 w-full gap-2 disabled:cursor-wait disabled:opacity-70">
+                    {isSubmitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <>Войти <ArrowRight className="h-4 w-4" /></>}
+                </button>
+            </form>
+
+            {userType === "user" && (
+                <p className="mt-7 text-center text-sm text-slate-500">
+                    Ещё нет аккаунта?{" "}
+                    <Link href="/register" className="font-semibold text-teal-700 hover:text-teal-900">
+                        Зарегистрироваться
+                    </Link>
                 </p>
-            </div>
-        </div>
+            )}
+        </AuthShell>
     );
-
 }

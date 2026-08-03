@@ -1,55 +1,55 @@
-import { usePsy } from "@/app/hooks/usePsy"
-import { IConsultationResponce } from "@/types/consultation.types"
+import { ClipboardCheck } from "lucide-react";
+import { usePsy } from "@/app/hooks/usePsy";
+import { IConsultationResponce } from "@/types/consultation.types";
 
-interface ITableConsultations {
-    consultations: IConsultationResponce[]
-}
-
-export default function TableConsultations({ consultations }: ITableConsultations) {
+function ConsultationRow({ consultation }: { consultation: IConsultationResponce }) {
+    const { data: psychologist } = usePsy(consultation.psyId || undefined);
+    const scores = consultation.questions
+        .map((question) => Number(question.answer))
+        .filter((answer) => Number.isFinite(answer));
+    const average = scores.length
+        ? (scores.reduce((total, score) => total + score, 0) / scores.length).toFixed(1)
+        : null;
 
     return (
-        <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Chat ID
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Consultation Date
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Consultation Results
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Psychologist
-                        </th>
-                    </tr>
-                </thead>
-                {consultations?.map(cons => {
-                    const { data: psy } = usePsy(cons.psyId)
-                    return (
-                        <tbody>
-                            <tr key={cons.userId} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer">
-                                    {cons.chatId}
-                                </th>
-                                <td className="px-6 py-4">
-                                    {new Date(cons.createdAt).toLocaleString()}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {cons.questions.map(que =>
-                                        <div>{que.question}:
-                                            <span className="text-red-500">{que.answer}</span></div>)}
-                                </td>
-                                {psy ? <td className="px-6 py-4">
-                                    {`${psy?.name} ${psy?.surname}`}
-                                </td> : undefined}
-                            </tr>
-                        </tbody>
-                    )
-                })}
-            </table>
+        <tr className="bg-white align-top">
+            <td className="px-5 py-4 font-mono text-xs text-slate-500">{consultation.chatId}</td>
+            <td className="whitespace-nowrap px-5 py-4 text-slate-500">{new Date(consultation.createdAt).toLocaleString("ru-RU")}</td>
+            <td className="px-5 py-4">
+                <div className="space-y-2">
+                    {average && <p className="mb-3 font-semibold text-amber-700">Средняя оценка: {average} / 10</p>}
+                    {consultation.questions.map((question, index) => (
+                        <div key={`${question.question}-${index}`} className="rounded-xl bg-slate-50 p-3">
+                            <p className="text-xs text-slate-500">{question.question}</p>
+                            <p className="mt-1 font-semibold text-slate-800">{question.answer}</p>
+                        </div>
+                    ))}
+                </div>
+            </td>
+            <td className="px-5 py-4 text-slate-600">{psychologist ? `${psychologist.name} ${psychologist.surname}` : "Не указан"}</td>
+        </tr>
+    );
+}
+
+export default function TableConsultations({ consultations }: { consultations: IConsultationResponce[] }) {
+    if (!consultations.length) {
+        return (
+            <div className="surface-card rounded-[1.5rem] p-10 text-center">
+                <ClipboardCheck className="mx-auto h-9 w-9 text-teal-700" />
+                <p className="mt-4 font-semibold text-slate-900">Консультаций пока нет</p>
+                <p className="mt-2 text-sm text-slate-500">Результаты опросов появятся после завершённых диалогов.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="surface-card overflow-hidden rounded-[1.5rem]">
+            <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] text-left text-sm">
+                    <thead className="bg-[#f7faf9] text-xs uppercase tracking-[0.08em] text-slate-500"><tr><th className="px-5 py-4">Chat ID</th><th className="px-5 py-4">Дата</th><th className="px-5 py-4">Результаты</th><th className="px-5 py-4">Специалист</th></tr></thead>
+                    <tbody className="divide-y divide-[#e7efec]">{consultations.map((consultation, index) => <ConsultationRow key={`${consultation.chatId}-${index}`} consultation={consultation} />)}</tbody>
+                </table>
+            </div>
         </div>
-    )
+    );
 }

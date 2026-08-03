@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import "react-chat-elements/dist/main.css"
 
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-
 export const metadata: Metadata = {
-	title: "Aikouch",
-	description: "Сhat bot for psychological support",
+	title: "Aikouch — поддержка рядом",
+	description: "Бережный AI-помощник для психологической поддержки",
 };
 
 export default function RootLayout({
@@ -18,8 +14,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body className={inter.variable}>
+		<html lang="ru">
+			<body>
 				<Providers>{children}</Providers>
 			</body>
 		</html>

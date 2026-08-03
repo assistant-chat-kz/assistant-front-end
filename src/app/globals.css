@@ -3,29 +3,71 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  /* --foreground: #171717; */
+  --background: #f3f7f6;
+  --foreground: #172321;
+  --surface: #ffffff;
+  --surface-muted: #eaf2ef;
+  --line: #dce7e3;
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --accent: #f9735b;
 }
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
 
 html, body {
   @apply h-full w-full m-0 p-0;
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 transition-colors;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(15, 118, 110, 0.11), transparent 27rem),
+    radial-gradient(circle at 92% 92%, rgba(249, 115, 91, 0.08), transparent 24rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 body.dark {
-  @apply bg-gray-900 text-gray-100;
+  --background: #101817;
+  --foreground: #eef7f4;
+  --surface: #172321;
+  --surface-muted: #20312e;
+  --line: #2c403c;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(45, 212, 191, 0.08), transparent 27rem),
+    #101817;
+  color: var(--foreground);
 }
 
+* {
+  box-sizing: border-box;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.22);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(15, 118, 110, 0.2);
+}
 
 body::-webkit-scrollbar,
 div::-webkit-scrollbar {
@@ -35,22 +77,56 @@ div::-webkit-scrollbar {
 
 body::-webkit-scrollbar-track,
 div::-webkit-scrollbar-track {
-  background: #f3f4f6; 
+  background: transparent;
 }
 
 body::-webkit-scrollbar-thumb,
 div::-webkit-scrollbar-thumb {
-  background-color: #9ca3af; 
+  background-color: #9fb4ae;
   border-radius: 6px;
 }
 
-/* ===== СКРОЛЛБАР ТЁМНАЯ ТЕМА ===== */
 body.dark::-webkit-scrollbar-track,
 div.dark::-webkit-scrollbar-track {
-  background: #1f2937; /* тёмный трек */
+  background: #172321;
 }
 
 body.dark::-webkit-scrollbar-thumb,
 div.dark::-webkit-scrollbar-thumb {
-  background-color: #4b5563; /* тёмный ползунок */
+  background-color: #45615b;
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 22px 70px rgba(26, 49, 44, 0.08);
+}
+
+.field-control {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.8rem 0.95rem;
+  color: var(--foreground);
+}
+
+.field-control::placeholder {
+  color: #84948f;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  background: var(--brand);
+  color: white;
+  font-weight: 650;
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.18);
+}
+
+.primary-button:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
 }

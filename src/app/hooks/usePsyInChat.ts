@@ -15,8 +15,7 @@ export function usePsyInChat() {
             const response = await chatService.insertPsyInChat(chatId as string, psyId as string);
             console.log("✅ Психолог добавлен в чат:", response.data);
 
-            //@ts-ignore
-            queryClient.invalidateQueries(["chat", chatId])
+            await queryClient.invalidateQueries({ queryKey: ["chatId", chatId] });
         } catch (err: any) {
             console.error("❌ Ошибка при добавлении психолога в чат:", err);
             setError(err.message);

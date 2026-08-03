@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "../services/users.service";
-import { IUserResponce } from "@/types/users.types";
+import { IUserNoAuthResponce, IUserResponce } from "@/types/users.types";
 
 export const useUser = (userId?: string) => {
-    return useQuery<IUserResponce>({
+    return useQuery<IUserResponce | IUserNoAuthResponce>({
         queryKey: ['user', userId],
         queryFn: async () => {
             const response = await userService.getUserById(userId as string);

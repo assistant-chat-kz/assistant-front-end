@@ -1,12 +1,24 @@
-import { useForm } from "react-hook-form";
-import { axiosClassic } from "@/api/interceptors";
-import { useRouter } from "next/navigation";
+"use client";
 
-import Modal from '@/components/Modal/Modal'
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, LoaderCircle } from "lucide-react";
+import { axiosClassic } from "@/api/interceptors";
+import AuthShell from "../AuthShell/AuthShell";
+import SourceBadge from "../SourceBadge/SourceBadge";
 
 interface RegisterProps {
-    userType: string;
+    userType: "user" | "admin" | "psychologist";
+}
+
+interface RegisterForm {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
 }
 
 export default function Register({ userType }: RegisterProps) {
@@ -15,170 +27,133 @@ export default function Register({ userType }: RegisterProps) {
         handleSubmit,
         watch,
         formState: { errors },
-    } = useForm();
-
-    const [openModal, setOpenModal] = useState(false)
-
+    } = useForm<RegisterForm>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
+    const email = watch("email", "");
 
-    const onSubmit = async (data: any) => {
+    const source = useMemo(
+        () => email.trim().toLowerCase().endsWith("@telecom.kz") ? "KAZAKHTELECOM" : "OTHER",
+        [email],
+    );
 
-        const dataForRegister = {
-            ...data,
-            userType: userType ? userType : undefined
-        }
+    const onSubmit = async ({ confirmPassword: _confirmPassword, ...data }: RegisterForm) => {
+        setIsSubmitting(true);
+        setErrorMessage("");
 
-        const telecomEmail = data.email.split('@')[1]
-
-        if (telecomEmail === 'telecom.kz') {
-            try {
-                const response = await axiosClassic.post("/auth/register", dataForRegister);
-                alert("Registration successful");
-                // alert("Подождите когда вашу почту подтвердят ");
-
-                // userType === 'admin' || userType === 'psychologist' ? router.push("cabinet") : router.push("/chat");
-                // router.push('/login')
-            } catch (error) {
-                //@ts-ignore
-                console.error(error.response?.data?.message || "Registration failed");
-            }
-        } else {
-            setOpenModal(true)
+        try {
+            await axiosClassic.post("/auth/register", { ...data, userType });
+            router.push(userType === "user" ? "/login?registered=1" : "/admin-panel");
+        } catch (error: any) {
+            setErrorMessage(
+                error.response?.data?.message || "Не удалось создать аккаунт. Возможно, эта почта уже используется.",
+            );
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
+    const title =
+        userType === "admin"
+            ? "Новый администратор"
+            : userType === "psychologist"
+                ? "Новый психолог"
+                : "Создайте аккаунт";
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <Modal
-                title={"Error"}
-                content={"Invalid email"}
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-                action={() => setOpenModal(false)}
-                button="accept"
-            />
-
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                    {userType === "admin"
-                        ? "Admin registration"
-                        : userType === "psychologist"
-                            ? "Psychologist registration"
-                            : "Registration"}
-                </h2>
-            </div>
-
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex gap-10">
-                        <div>
-                            <label className="block text-sm/6 font-medium text-gray-900">
-                                First name
-                            </label>
-                            <input
-                                {...register("name", { required: "Enter your first name" })}
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
-                            />
-                            {errors.name && (
-                                //@ts-ignore
-                                <p className="text-red-500 text-sm">{errors.name.message}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm/6 font-medium text-gray-900">
-                                Last name
-                            </label>
-                            <input
-                                {...register("surname", { required: "Enter your last name" })}
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
-                            />
-                            {errors.surname && (
-                                //@ts-ignore
-                                <p className="text-red-500 text-sm">{errors.surname.message}</p>
-                            )}
-                        </div>
-                    </div>
-
+        <AuthShell title={title} description="Пара минут — и можно начинать разговор.">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+                <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                        <label className="block text-sm/6 font-medium text-gray-900">
-                            Email address
-                        </label>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Имя</label>
                         <input
-                            {...register("email", {
-                                required: "Enter your email",
-                                pattern: {
-                                    value: /.+@.+\..+/,
-                                    message: "Invalid email",
-                                },
-                            })}
-                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
+                            {...register("name", { required: "Укажите имя" })}
+                            className="field-control"
+                            autoComplete="given-name"
+                            placeholder="Имя"
                         />
-                        {errors.email && (
-                            //@ts-ignore
-                            <p className="text-red-500 text-sm">{errors.email.message}</p>
-                        )}
+                        {errors.name && <p className="mt-2 text-sm text-rose-600">{errors.name.message}</p>}
                     </div>
-
                     <div>
-                        <label className="block text-sm/6 font-medium text-gray-900">
-                            Password
-                        </label>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Фамилия</label>
                         <input
-                            {...register("password", {
-                                required: "Enter your password",
-                                minLength: {
-                                    value: 6,
-                                    message: "Minimum 6 characters",
-                                },
-                            })}
-                            type="password"
-                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
+                            {...register("surname", { required: "Укажите фамилию" })}
+                            className="field-control"
+                            autoComplete="family-name"
+                            placeholder="Фамилия"
                         />
-                        {errors.password && (
-                            //@ts-ignore
-                            <p className="text-red-500 text-sm">{errors.password.message}</p>
-                        )}
+                        {errors.surname && <p className="mt-2 text-sm text-rose-600">{errors.surname.message}</p>}
                     </div>
+                </div>
 
-                    <div>
-                        <label className="block text-sm/6 font-medium text-gray-900">
-                            Confirm password
-                        </label>
-                        <input
-                            {...register("confirmPassword", {
-                                required: "Confirm your password",
-                                validate: (value) =>
-                                    value === watch("password") || "Passwords do not match",
-                            })}
-                            type="password"
-                            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 focus:outline-indigo-600 sm:text-sm/6"
-                        />
-                        {errors.confirmPassword && (
-                            <p className="text-red-500 text-sm">Passwords do not match</p>
-                        )}
+                <div>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                        <label className="block text-sm font-medium text-slate-700">Электронная почта</label>
+                        {email.includes("@") && <SourceBadge source={source} compact />}
                     </div>
+                    <input
+                        {...register("email", {
+                            required: "Укажите почту",
+                            pattern: { value: /.+@.+\..+/, message: "Проверьте адрес почты" },
+                        })}
+                        type="email"
+                        className="field-control"
+                        autoComplete="email"
+                        placeholder="name@example.kz"
+                    />
+                    {errors.email && <p className="mt-2 text-sm text-rose-600">{errors.email.message}</p>}
+                </div>
 
-                    <button
-                        type="submit"
-                        className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-500"
-                    >
-                        Register
-                    </button>
-                </form>
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Пароль</label>
+                    <input
+                        {...register("password", {
+                            required: "Введите пароль",
+                            minLength: { value: 6, message: "Минимум 6 символов" },
+                        })}
+                        type="password"
+                        className="field-control"
+                        autoComplete="new-password"
+                        placeholder="Не меньше 6 символов"
+                    />
+                    {errors.password && <p className="mt-2 text-sm text-rose-600">{errors.password.message}</p>}
+                </div>
 
-                <p className="mt-10 text-center text-sm/6 text-gray-500">
-                    Already have an account?{" "}
-                    <a
-                        href="login"
-                        className="font-semibold text-indigo-600 hover:text-indigo-500"
-                    >
-                        Sign in
-                    </a>
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Повторите пароль</label>
+                    <input
+                        {...register("confirmPassword", {
+                            required: "Повторите пароль",
+                            validate: (value) => value === watch("password") || "Пароли не совпадают",
+                        })}
+                        type="password"
+                        className="field-control"
+                        autoComplete="new-password"
+                        placeholder="Повторите пароль"
+                    />
+                    {errors.confirmPassword && <p className="mt-2 text-sm text-rose-600">{errors.confirmPassword.message}</p>}
+                </div>
+
+                {errorMessage && (
+                    <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {errorMessage}
+                    </div>
+                )}
+
+                <button type="submit" disabled={isSubmitting} className="primary-button h-12 w-full gap-2 disabled:cursor-wait disabled:opacity-70">
+                    {isSubmitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <>Создать аккаунт <ArrowRight className="h-4 w-4" /></>}
+                </button>
+            </form>
+
+            {userType === "user" && (
+                <p className="mt-7 text-center text-sm text-slate-500">
+                    Уже есть аккаунт?{" "}
+                    <Link href="/login" className="font-semibold text-teal-700 hover:text-teal-900">
+                        Войти
+                    </Link>
                 </p>
-            </div>
-        </div>
+            )}
+        </AuthShell>
     );
-
 }

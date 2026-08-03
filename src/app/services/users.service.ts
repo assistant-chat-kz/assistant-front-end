@@ -14,18 +14,23 @@ class UserService {
         return response
     }
 
+    async getAnalytics() {
+        const response = await axiosClassic.get(`${this.BASE_URL}/analytics`)
+        return response
+    }
+
     async getUserById(userId: string) {
         const response = await axiosClassic.get(`${this.BASE_URL}/${userId}`)
         return response
     }
 
     async verifyUser(userId: string) {
-        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}`)
+        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}/verify`)
         return response
     }
 
-    async visitUser(userId: string) {
-        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}/visit`)
+    async visitUser(userId: string, sessionId: string) {
+        const response = await axiosClassic.put(`${this.BASE_URL}/${userId}/visit`, { sessionId })
         return response
     }
 

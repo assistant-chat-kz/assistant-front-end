@@ -15,8 +15,7 @@ export function useCallPsy() {
             const response = await chatService.callPsyInChat(chatId as string, call);
             console.log("✅ Психолог вызван:", response.data);
 
-            //@ts-ignore
-            queryClient.invalidateQueries(["chat", chatId])
+            await queryClient.invalidateQueries({ queryKey: ["chatId", chatId] });
         } catch (err: any) {
             console.error("❌ Ошибка при вызове психолога:", err);
             setError(err.message);
